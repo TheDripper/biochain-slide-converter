@@ -1,6 +1,23 @@
 <template>
   <div id="root">
-    <p v-for="slide in slides">{{ slide.Name }}</p>
+    <table id="slides">
+      <thead>
+        <tr>
+          <th>Slide</th>
+          <th>Status</th>
+          <th>Url</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="check in fileCheck">
+          <td>{{ check.filename }}</td>
+          <td>{{ check.status }}</td>
+          <td>
+            <a target="_blank" :href="check.url">View Slide on biochain.com</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </template>
 <script>
@@ -9,22 +26,51 @@ const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KYPYOXCXF",
   secretAccessKey: "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",
 });
+import $ from "jquery";
+import "datatables";
 export default {
-  async asyncData() {
-    const params = {
-      Bucket: "biochain",
-      Key: "converted/ASDF-1234.dzi",
-    };
-    const fileCheck = await s3.getObject(params).promise();
-    console.log(fileCheck);
-    return {
-        fileCheck
+  mounted() {
+    if (process.browser) {
+      $("#slides").dataTable();
     }
   },
-  computed: {
-    slides() {
-      return this.$store.state.slides;
-    },
+  async asyncData({ store }) {
+    let slides = store.state.slides;
+    let fileCheck = [];
+    for (const slide of slides) {
+      let key = "converted/" + slide.slide + ".dzi";
+      let url = "http://biochain.com/slides/?id=" + slide.slide;
+      const params = {
+        Bucket: "biochain",
+        Key: key,
+      };
+      try {
+        const fileTest = await s3.getObject(params).promise();
+        let testObj = {
+          "aws-key": key,
+          test: fileTest,
+          status: "success",
+          filename: slide.slide,
+          url,
+        };
+        fileCheck.push(testObj);
+      } catch (err) {
+        const fileTest = err.toString();
+        let testObj = {
+          "aws-key": key,
+          test: fileTest,
+          status: "error",
+          filename: slide.slide,
+          url,
+        };
+        fileCheck.push(testObj);
+      }
+    }
+    return {
+      fileCheck,
+      slides,
+    };
   },
+  computed: {},
 };
 </script>
