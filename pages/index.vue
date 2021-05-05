@@ -1,6 +1,6 @@
 <template>
   <div id="root">
-    <table id="slides">
+    <table id="slides" class="w-full p-8">
       <thead>
         <tr>
           <th>Slide</th>
@@ -74,3 +74,8 @@ export default {
   computed: {},
 };
 </script>
+<style>
+th, td {
+  @apply w-1/3 p-2 border;
+}
+</style>
