@@ -31,7 +31,9 @@ import "datatables";
 export default {
   mounted() {
     if (process.browser) {
-      $("#slides").dataTable();
+      $("#slides").dataTable({
+        paging: false,
+      });
     }
   },
   async asyncData({ store }) {
@@ -75,7 +77,18 @@ export default {
 };
 </script>
 <style>
-th, td {
+th,
+td {
   @apply w-1/3 p-2 border;
+}
+#slides_filter {
+  @apply text-xl p-4;
+}
+#slides_filter input {
+  @apply border;
+}
+a {
+  color: blue;
+  text-decoration: underline;
 }
 </style>

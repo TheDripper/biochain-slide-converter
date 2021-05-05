@@ -25,8 +25,8 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/tailwindcss
-    "@nuxtjs/tailwindcss"
-    // "~/modules/converter.js"
+    "@nuxtjs/tailwindcss",
+    "~/modules/converter.js"
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
