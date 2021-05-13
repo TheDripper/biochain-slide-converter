@@ -1,8 +1,8 @@
-// import slides from "~/static/slide-list.csv"
+import live from "~/live.json"
 const csv = require("csvtojson");
 
 export const state = () => ({
-  slides: {}
+  slides: []
 });
 
 export const mutations = {
@@ -16,8 +16,6 @@ export const actions = {
   //   commit('slides',slides);
   // },
   async nuxtServerInit({commit}) {
-    const slides = await csv().fromFile('./static/slides.csv');
-    console.log(process.env.NODE_ENV);
-      commit('slides',slides);
+      commit('slides',live);
   }
 };

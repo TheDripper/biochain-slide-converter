@@ -5,7 +5,8 @@
         <tr>
           <th>Slide</th>
           <th>Status</th>
-          <th>Url</th>
+          <th>Slide Link</th>
+          <th>Product Page</th>
         </tr>
       </thead>
       <tbody>
@@ -14,6 +15,9 @@
           <td>{{ check.status }}</td>
           <td>
             <a target="_blank" :href="check.url">View Slide on biochain.com</a>
+          </td>
+          <td>
+            <a target="_blank" :href="check.product">{{ check.name }}</a>
           </td>
         </tr>
       </tbody>
@@ -42,6 +46,9 @@ export default {
     for (const slide of slides) {
       let key = "converted/" + slide.slide + ".dzi";
       let url = "http://biochain.com/slides/?id=" + slide.slide;
+      let s3uri = "https://biochain.s3-us-west-1.amazonaws.com/converted/"+slide.slide+".dzi";
+      let product = slide.product
+      let name = slide.name
       const params = {
         Bucket: "biochain",
         Key: key,
@@ -54,6 +61,9 @@ export default {
           status: "success",
           filename: slide.slide,
           url,
+          s3uri,
+          product,
+          name
         };
         fileCheck.push(testObj);
       } catch (err) {
@@ -64,6 +74,9 @@ export default {
           status: "error",
           filename: slide.slide,
           url,
+          s3uri,
+          product,
+          name
         };
         fileCheck.push(testObj);
       }
@@ -79,7 +92,7 @@ export default {
 <style>
 th,
 td {
-  @apply w-1/3 p-2 border;
+  @apply w-1/4 p-2 border;
 }
 #slides_filter {
   @apply text-xl p-4;

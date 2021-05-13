@@ -4,6 +4,8 @@ const fs = require("fs-extra");
 const path = require("path");
 const rimraf = require("rimraf");
 const util = require("util");
+const csv = require("csvtojson");
+
 
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KYPYOXCXF",
@@ -87,11 +89,60 @@ async function convertDzi(slides) {
   }
 }
 
-function main() {
+async function main() {
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
-  convertDzi(slides);
+  // convertDzi(slides);
+  const master = await csv().fromFile('./static/slides.csv');
+  let masterFiles = [];
+  for (let i of master) {
+    masterFiles.push({
+      slide: i.slide,
+      product: i.Notes,
+      name: i.Name
+    });
+  }
+  let latest = [];
+  for (let k of slides) {
+    latest.push({
+      slide: k.replace('.svs',''),
+      product: '',
+      name: ''
+    });
+  }
+  fs.writeFileSync("./latest-slides.json", JSON.stringify(latest));
+  fs.writeFileSync("./master.json", JSON.stringify(masterFiles));
+  fs.writeFileSync("./live.json", JSON.stringify(masterFiles.concat(latest)));
+  let params = {
+    Bucket: 'biochain',
+    Key: 'slides.json',
+    Body: fs.readFileSync("./live.json")
+  };
+  s3.putObject(params, function(err, data) {
+    if (err) {
+      console.log(err);
+      fs.writeFileSync("error.json", JSON.stringify(err));
+    } else {
+      console.log(
+        "Successfully uploaded JSON"
+      );
+    }
+  });
+  // var bucketParams = {
+  //   Bucket : 'biochain',
+  //   Prefix: 'converted/'
+  // };
+  
+  // Call S3 to obtain a list of the objects in the bucket
+  // s3.listObjects(bucketParams, function(err, data) {
+  //   if (err) {
+  //     console.log("Error", err);
+  //   } else {
+  //     console.log("Success", data);
+  //     fs.writeFileSync("s3.json", JSON.stringify(data));
+  //   }
+  // });
   // const filename = "T853448-A604429";
   // uploadDir(filename, "biochain",filename);
   // console.log('next');
