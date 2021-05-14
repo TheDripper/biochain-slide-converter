@@ -1,5 +1,19 @@
 <template>
   <div id="root">
+    <table id="errors" class="w-full p-8">
+      <thead>
+        <tr>
+          <th>Slide</th>
+          <th>Upload Error</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="error in errors">
+          <td>{{ error.slide }}</td>
+          <td>{{ error.error }}</td>
+        </tr>
+      </tbody>
+    </table>
     <table id="slides" class="w-full p-8">
       <thead>
         <tr>
@@ -38,17 +52,24 @@ export default {
       $("#slides").dataTable({
         paging: false,
       });
+      $("#errors").dataTable({
+        paging: false,
+      });
     }
   },
   async asyncData({ store }) {
     let slides = store.state.slides;
+    let errors = store.state.errors;
     let fileCheck = [];
     for (const slide of slides) {
       let key = "converted/" + slide.slide + ".dzi";
       let url = "http://biochain.com/slides/?id=" + slide.slide;
-      let s3uri = "https://biochain.s3-us-west-1.amazonaws.com/converted/"+slide.slide+".dzi";
-      let product = slide.product
-      let name = slide.name
+      let s3uri =
+        "https://biochain.s3-us-west-1.amazonaws.com/converted/" +
+        slide.slide +
+        ".dzi";
+      let product = slide.product;
+      let name = slide.name;
       const params = {
         Bucket: "biochain",
         Key: key,
@@ -63,7 +84,7 @@ export default {
           url,
           s3uri,
           product,
-          name
+          name,
         };
         fileCheck.push(testObj);
       } catch (err) {
@@ -76,7 +97,7 @@ export default {
           url,
           s3uri,
           product,
-          name
+          name,
         };
         fileCheck.push(testObj);
       }
@@ -84,6 +105,7 @@ export default {
     return {
       fileCheck,
       slides,
+      errors,
     };
   },
   computed: {},

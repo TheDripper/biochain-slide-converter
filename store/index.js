@@ -1,13 +1,18 @@
 import live from "~/live.json"
+import errors from "~/errors.json"
 const csv = require("csvtojson");
 
 export const state = () => ({
-  slides: []
+  slides: [],
+  errors: []
 });
 
 export const mutations = {
   slides(state, slides) {
     state.slides = slides;
+  },
+  errors(state, errors) {
+    state.errors = errors;
   }
 };
 export const actions = {
@@ -17,5 +22,6 @@ export const actions = {
   // },
   async nuxtServerInit({commit}) {
       commit('slides',live);
+      commit('errors',errors);
   }
 };

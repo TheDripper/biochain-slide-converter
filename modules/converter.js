@@ -52,11 +52,11 @@ const uploadDir = function(s3Path, bucketName, filename) {
 };
 // const s3uploadDir = util.promisify(uploadDir);
 async function convertDzi(slides) {
+  let errors = [];
   for (let obj of slides) {
     let filename = obj.slice(0, -4);
     console.log(filename);
     fs.mkdir(filename);
-    console.log(obj);
     await sharp("./upload-svs/" + obj, {
       limitInputPixels: false
     })
@@ -67,33 +67,24 @@ async function convertDzi(slides) {
       .toFile(filename + "/" + filename + ".dz", function(err, info) {
         if (err) {
           console.log(err);
+          errors.push({
+            error: err,
+            slide: filename
+          });
         } else {
           console.log(info);
           uploadDir(filename, "biochain", filename);
-          // const fileContent = fs.readFileSync(filename+"/"+filename+".dzi");
-          // s3.upload({
-          //   Bucket: "biochain",
-          //   Body: fileContent,
-          //   Key: "converted/"+filename+".dzi"
-          // }, async function (err, data) {
-          //   if (err) {
-          //     throw err;
-          //   }
-          //   console.log(`File uploaded successfully. ${data.Location}`);
-          //   console.log('done');
-          // });
         }
-        // output.dzi is the Deep Zoom XML definition
-        // output_files contains 512x512 tiles grouped by zoom level
       });
   }
+  return errors;
 }
 
 async function main() {
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
-  // convertDzi(slides);
+  let errors = await convertDzi(slides);
   const master = await csv().fromFile('./static/slides.csv');
   let masterFiles = [];
   for (let i of master) {
@@ -111,6 +102,7 @@ async function main() {
       name: ''
     });
   }
+  fs.writeFileSync("./errors.json", JSON.stringify(errors));
   fs.writeFileSync("./latest-slides.json", JSON.stringify(latest));
   fs.writeFileSync("./master.json", JSON.stringify(masterFiles));
   fs.writeFileSync("./live.json", JSON.stringify(masterFiles.concat(latest)));
