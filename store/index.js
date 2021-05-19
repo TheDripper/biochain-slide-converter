@@ -1,6 +1,6 @@
-import live from "~/live.json"
-import errors from "~/errors.json"
-const csv = require("csvtojson");
+import live from "~/live.json";
+import errors from "~/errors.json";
+
 
 export const state = () => ({
   slides: [],
@@ -20,8 +20,9 @@ export const actions = {
   //   const slides = await this.$axios.$get('/wp-json/wp/v2/product');
   //   commit('slides',slides);
   // },
-  async nuxtServerInit({commit}) {
-      commit('slides',live);
-      commit('errors',errors);
+  async fileCheck({ commit }) {},
+  async nuxtServerInit({ commit }) {
+    commit("slides", live);
+    commit("errors", errors);
   }
 };

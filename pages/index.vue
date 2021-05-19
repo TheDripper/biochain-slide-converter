@@ -19,14 +19,16 @@
         <tr>
           <th>Slide</th>
           <th>Status</th>
+          <th>Uploaded on</th>
           <th>Slide Link</th>
           <th>Product Page</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="check in fileCheck">
-          <td>{{ check.filename }}</td>
+        <tr v-for="check in slides">
+          <td>{{ check.slide }}</td>
           <td>{{ check.status }}</td>
+          <td>{{ check.date }}</td>
           <td>
             <a target="_blank" :href="check.url">View Slide on biochain.com</a>
           </td>
@@ -46,7 +48,12 @@ const s3 = new AWS.S3({
 });
 import $ from "jquery";
 import "datatables";
+import { mapActions } from "vuex";
+
 export default {
+  methods: {
+    ...mapActions(["fileCheck"]),
+  },
   mounted() {
     if (process.browser) {
       $("#slides").dataTable({
@@ -57,58 +64,14 @@ export default {
       });
     }
   },
-  async asyncData({ store }) {
-    let slides = store.state.slides;
-    let errors = store.state.errors;
-    let fileCheck = [];
-    for (const slide of slides) {
-      let key = "converted/" + slide.slide + ".dzi";
-      let url = "http://biochain.com/slides/?id=" + slide.slide;
-      let s3uri =
-        "https://biochain.s3-us-west-1.amazonaws.com/converted/" +
-        slide.slide +
-        ".dzi";
-      let product = slide.product;
-      let name = slide.name;
-      const params = {
-        Bucket: "biochain",
-        Key: key,
-      };
-      try {
-        const fileTest = await s3.getObject(params).promise();
-        let testObj = {
-          "aws-key": key,
-          test: fileTest,
-          status: "success",
-          filename: slide.slide,
-          url,
-          s3uri,
-          product,
-          name,
-        };
-        fileCheck.push(testObj);
-      } catch (err) {
-        const fileTest = err.toString();
-        let testObj = {
-          "aws-key": key,
-          test: fileTest,
-          status: "error",
-          filename: slide.slide,
-          url,
-          s3uri,
-          product,
-          name,
-        };
-        fileCheck.push(testObj);
-      }
+  computed: {
+    slides() {
+      return this.$store.state.slides
+    },
+    errors() {
+      return this.$store.state.errors
     }
-    return {
-      fileCheck,
-      slides,
-      errors,
-    };
   },
-  computed: {},
 };
 </script>
 <style>

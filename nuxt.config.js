@@ -32,18 +32,20 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
-    "@nuxtjs/axios"
+    "@nuxtjs/axios",
+    "@nuxtjs/proxy"
   ],
-
+  proxy: {
+    // '/wp-json': 'https://79d801e6b0b6.ngrok.io'
+    "/wp": "https://biochain.s3-us-west-1.amazonaws.com/"
+  },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-    babel:{
-      plugins: [
-        ['@babel/plugin-proposal-private-methods', { loose: true }]
-      ]
+    babel: {
+      plugins: [["@babel/plugin-proposal-private-methods", { loose: true }]]
     }
   }
 };

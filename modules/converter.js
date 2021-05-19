@@ -85,30 +85,58 @@ async function main() {
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
   let errors = await convertDzi(slides);
-  const master = await csv().fromFile('./static/slides.csv');
+  const master = await csv().fromFile("./static/slides.csv");
+
   let masterFiles = [];
   for (let i of master) {
     masterFiles.push({
       slide: i.slide,
       product: i.Notes,
-      name: i.Name
+      name: i.Name,
+      date: "",
+      status: "unknown"
     });
   }
   let latest = [];
   for (let k of slides) {
     latest.push({
-      slide: k.replace('.svs',''),
-      product: '',
-      name: ''
+      slide: k.replace(".svs", ""),
+      product: "",
+      name: "",
+      date: Date.now(),
+      status: "unknown"
     });
   }
   fs.writeFileSync("./errors.json", JSON.stringify(errors));
   fs.writeFileSync("./latest-slides.json", JSON.stringify(latest));
   fs.writeFileSync("./master.json", JSON.stringify(masterFiles));
-  fs.writeFileSync("./live.json", JSON.stringify(masterFiles.concat(latest)));
+  let live = masterFiles.concat(latest);
+  let slideCount = 1;
+  let slideTotal = live.length;
+  for (let slide of live) {
+    let key = "converted/" + slide.slide + ".dzi";
+    slide.url = "http://biochain.com/slides/?id=" + slide.slide;
+    slide.s3uri = "/aws/converted/" + slide.slide + ".dzi";
+    slide.product = slide.product;
+    slide.name = slide.name;
+    const params = {
+      Bucket: "biochain",
+      Key: key
+    };
+    try {
+      const fileTest = await s3.getObject(params).promise();
+      slide.status = "success";
+    } catch (err) {
+      const fileTest = "Error: " + err.toString();
+      slide.status = fileTest;
+    }
+    console.log("Checking slide "+slideCount+" of "+slideTotal+": "+slide.name);
+    slideCount++;
+  }
+  fs.writeFileSync("./live.json", JSON.stringify(live));
   let params = {
-    Bucket: 'biochain',
-    Key: 'slides.json',
+    Bucket: "biochain",
+    Key: "slides.json",
     Body: fs.readFileSync("./live.json")
   };
   s3.putObject(params, function(err, data) {
@@ -116,16 +144,14 @@ async function main() {
       console.log(err);
       fs.writeFileSync("error.json", JSON.stringify(err));
     } else {
-      console.log(
-        "Successfully uploaded JSON"
-      );
+      console.log("Successfully uploaded JSON");
     }
   });
   // var bucketParams = {
   //   Bucket : 'biochain',
   //   Prefix: 'converted/'
   // };
-  
+
   // Call S3 to obtain a list of the objects in the bucket
   // s3.listObjects(bucketParams, function(err, data) {
   //   if (err) {
