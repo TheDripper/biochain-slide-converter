@@ -4,10 +4,14 @@ import errors from "~/errors.json";
 
 export const state = () => ({
   slides: [],
-  errors: []
+  errors: [],
+  date: ''
 });
 
 export const mutations = {
+  date(state, date) {
+    state.date = date;
+  },
   slides(state, slides) {
     state.slides = slides;
   },
@@ -22,6 +26,8 @@ export const actions = {
   // },
   async fileCheck({ commit }) {},
   async nuxtServerInit({ commit }) {
+    let date = live.pop();
+    commit("date", date);
     commit("slides", live);
     commit("errors", errors);
   }

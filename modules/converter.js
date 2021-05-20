@@ -6,7 +6,6 @@ const rimraf = require("rimraf");
 const util = require("util");
 const csv = require("csvtojson");
 
-
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KYPYOXCXF",
   secretAccessKey: "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"
@@ -86,14 +85,27 @@ async function main() {
     .filter(slide => slide.endsWith(".svs"));
   let errors = await convertDzi(slides);
   const master = await csv().fromFile("./static/slides.csv");
-
+  var currentdate = new Date();
+  var datetime =
+    "Last Sync: " +
+    currentdate.getDate() +
+    "/" +
+    (currentdate.getMonth() + 1) +
+    "/" +
+    currentdate.getFullYear() +
+    " @ " +
+    currentdate.getHours() +
+    ":" +
+    currentdate.getMinutes() +
+    ":" +
+    currentdate.getSeconds();
   let masterFiles = [];
   for (let i of master) {
     masterFiles.push({
       slide: i.slide,
       product: i.Notes,
       name: i.Name,
-      date: "",
+      date: "2020 (Victoria)",
       status: "unknown"
     });
   }
@@ -103,7 +115,7 @@ async function main() {
       slide: k.replace(".svs", ""),
       product: "",
       name: "",
-      date: Date.now(),
+      date: datetime,
       status: "unknown"
     });
   }
@@ -130,9 +142,16 @@ async function main() {
       const fileTest = "Error: " + err.toString();
       slide.status = fileTest;
     }
-    console.log("Checking slide "+slideCount+" of "+slideTotal+": "+slide.name);
+    console.log(
+      "Checking slide " + slideCount + " of " + slideTotal + ": " + slide.name
+    );
     slideCount++;
   }
+
+  live.push({
+    name: "Last Audit",
+    date: datetime
+  });
   fs.writeFileSync("./live.json", JSON.stringify(live));
   let params = {
     Bucket: "biochain",

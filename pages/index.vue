@@ -14,6 +14,7 @@
         </tr>
       </tbody>
     </table>
+    <h2 class="text-xl text-center my-8">{{ date.date }}</h2>
     <table id="slides" class="w-full p-8">
       <thead>
         <tr>
@@ -70,6 +71,9 @@ export default {
     },
     errors() {
       return this.$store.state.errors
+    },
+    date() {
+      return this.$store.state.date
     }
   },
 };
@@ -82,7 +86,13 @@ td {
 #slides_filter {
   @apply text-xl p-4;
 }
+#errors_filter {
+  @apply text-xl p-4;
+}
 #slides_filter input {
+  @apply border;
+}
+#errors_filter input {
   @apply border;
 }
 a {
