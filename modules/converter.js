@@ -7,16 +7,16 @@ const util = require("util");
 const csv = require("csvtojson");
 
 const s3 = new AWS.S3({
-  accessKeyId: "AKIA4EV32R5KYPYOXCXF",
-  secretAccessKey: "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"
+  accessKeyId: "AKIA4EV32R5KQIFS6VRG",
+  secretAccessKey: "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"
 });
-const uploadDir = function(s3Path, bucketName, filename) {
-  //    let s3 = new AWS.S3();
-
+async function uploadDir(s3Path, bucketName) {
+  let logout = [];
+  console.log('dir');
   function walkSync(currentDirPath, callback) {
     fs.readdirSync(currentDirPath).forEach(function(name) {
+      console.log(name);
       var filePath = path.join(currentDirPath, name);
-      console.log(filePath);
       var stat = fs.statSync(filePath);
       if (stat.isFile()) {
         callback(filePath, stat);
@@ -25,171 +25,87 @@ const uploadDir = function(s3Path, bucketName, filename) {
       }
     });
   }
-
-  walkSync(s3Path, function(filePath, stat) {
+  walkSync(s3Path, async function(filePath, stat) {
     let bucketPath =
       "converted/" + filePath.substring(s3Path.length + 1).replace(/\\/g, "/");
+      console.log(bucketPath);
+    let body = fs.readFileSync(filePath);
     let params = {
       Bucket: bucketName,
       Key: bucketPath,
-      Body: fs.readFileSync(filePath)
+      Body: body
     };
-    s3.putObject(params, function(err, data) {
-      if (err) {
-        console.log(err);
-        fs.writeFileSync("error.json", JSON.stringify(err));
-      } else {
-        console.log(
-          "Successfully uploaded " + bucketPath + " to " + bucketName
-        );
-        fs.unlinkSync(filePath);
-        console.log("deleted" + filePath);
-      }
-    });
+    let filePush = await s3.putObject(params).promise();
+    console.log("push");
+    console.log(filePush);
   });
-  console.log("walkdone");
+  console.log('done');
+  return logout;
 };
-// const s3uploadDir = util.promisify(uploadDir);
-async function convertDzi(slides) {
-  let errors = [];
-  for (let obj of slides) {
-    let filename = obj.slice(0, -4);
-    console.log(filename);
-    fs.mkdir(filename);
-    await sharp("./upload-svs/" + obj, {
-      limitInputPixels: false
-    })
-      .jpeg()
-      .tile({
-        size: 512
-      })
-      .toFile(filename + "/" + filename + ".dz", function(err, info) {
-        if (err) {
-          console.log(err);
-          errors.push({
-            error: err,
-            slide: filename
-          });
-        } else {
-          console.log(info);
-          uploadDir(filename, "biochain", filename);
-        }
-      });
-  }
-  return errors;
-}
 
-async function main() {
+async function convertDzi(slides) {
+  console.log(path.join(__dirname, "converted"));
+  let audit = {
+    error: [],
+    success: []
+  };
+  try {
+    if (fs.existsSync(path.join(__dirname, "converted"))) {
+      fs.rmdirSync(path.join(__dirname, "converted"), { recursive: true });
+    }
+    fs.mkdirSync(path.join(__dirname, "converted"), 0o777);
+    for (let obj of slides) {
+      let filename = obj.slice(0, -4);
+      console.log(filename);
+      if (fs.existsSync(path.join(__dirname, "converted/" + filename))) {
+        fs.rmdirSync(path.join(__dirname, "converted/" + filename));
+      }
+      fs.mkdirSync(path.join(__dirname, "converted/" + filename), 0o777);
+      await sharp("./upload-svs/" + obj, {
+        limitInputPixels: false
+      })
+        .jpeg()
+        .tile({
+          size: 512
+        })
+        .toFile(path.join(__dirname, "converted/" + filename) + ".dz", function(
+          err,
+          info
+        ) {
+          if (err) {
+            console.log(err);
+            audit.error.push({
+              error: err,
+              slide: filename
+            });
+          } else {
+            console.log(info);
+            audit.success.push({
+              info,
+              slide: filename
+            });
+          }
+        });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+  return audit;
+}
+const dziSync = util.promisify(convertDzi);
+const uploadSync = util.promisify(uploadDir);
+
+export default async function asyncModule() {
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
-  let errors = await convertDzi(slides);
-  const master = await csv().fromFile("./static/slides.csv");
-  var currentdate = new Date();
-  var datetime =
-    "Last Sync: " +
-    currentdate.getDate() +
-    "/" +
-    (currentdate.getMonth() + 1) +
-    "/" +
-    currentdate.getFullYear() +
-    " @ " +
-    currentdate.getHours() +
-    ":" +
-    currentdate.getMinutes() +
-    ":" +
-    currentdate.getSeconds();
-  let masterFiles = [];
-  for (let i of master) {
-    masterFiles.push({
-      slide: i.slide,
-      product: i.Notes,
-      name: i.Name,
-      date: "2020 (Victoria)",
-      status: "unknown"
-    });
-  }
-  let latest = [];
-  for (let k of slides) {
-    latest.push({
-      slide: k.replace(".svs", ""),
-      product: "",
-      name: "",
-      date: datetime,
-      status: "unknown"
-    });
-  }
-  fs.writeFileSync("./errors.json", JSON.stringify(errors));
-  fs.writeFileSync("./latest-slides.json", JSON.stringify(latest));
-  fs.writeFileSync("./master.json", JSON.stringify(masterFiles));
-  let live = masterFiles.concat(latest);
-  let slideCount = 1;
-  let slideTotal = live.length;
-  for (let slide of live) {
-    let key = "converted/" + slide.slide + ".dzi";
-    slide.url = "http://biochain.com/slides/?id=" + slide.slide;
-    slide.s3uri = "/aws/converted/" + slide.slide + ".dzi";
-    slide.product = slide.product;
-    slide.name = slide.name;
-    const params = {
-      Bucket: "biochain",
-      Key: key
-    };
-    try {
-      const fileTest = await s3.getObject(params).promise();
-      slide.status = "success";
-    } catch (err) {
-      const fileTest = "Error: " + err.toString();
-      slide.status = fileTest;
-    }
-    console.log(
-      "Checking slide " + slideCount + " of " + slideTotal + ": " + slide.name
-    );
-    slideCount++;
-  }
-
-  live.push({
-    name: "Last Audit",
-    date: datetime
-  });
-  fs.writeFileSync("./live.json", JSON.stringify(live));
-  let params = {
-    Bucket: "biochain",
-    Key: "slides.json",
-    Body: fs.readFileSync("./live.json")
-  };
-  s3.putObject(params, function(err, data) {
-    if (err) {
-      console.log(err);
-      fs.writeFileSync("error.json", JSON.stringify(err));
-    } else {
-      console.log("Successfully uploaded JSON");
-    }
-  });
-  // var bucketParams = {
-  //   Bucket : 'biochain',
-  //   Prefix: 'converted/'
-  // };
-
-  // Call S3 to obtain a list of the objects in the bucket
-  // s3.listObjects(bucketParams, function(err, data) {
-  //   if (err) {
-  //     console.log("Error", err);
-  //   } else {
-  //     console.log("Success", data);
-  //     fs.writeFileSync("s3.json", JSON.stringify(data));
-  //   }
-  // });
-  // const filename = "T853448-A604429";
-  // uploadDir(filename, "biochain",filename);
-  // console.log('next');
-}
-export default async function asyncModule() {
-  try {
-    main();
-    // uploadDir("converted/"+filename+"_files", "biochain",filename);
-  } catch (err) {
-    console.log(err);
-    fs.writeFileSync("error.txt", JSON.stringify(err));
-  }
+  // let auditResult = await dziSync(slides);
+  let awsLog = await uploadSync(
+    path.join(__dirname, "converted"),
+    "biochain-dev",
+    "converted"
+  );
+  console.log(awsLog);
+  // fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
+  fs.writeFileSync("./awsLog.json", JSON.stringify(awsLog));
 }

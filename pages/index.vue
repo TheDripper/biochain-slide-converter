@@ -42,11 +42,6 @@
   </div>
 </template>
 <script>
-var AWS = require("aws-sdk");
-const s3 = new AWS.S3({
-  accessKeyId: "AKIA4EV32R5KYPYOXCXF",
-  secretAccessKey: "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",
-});
 import $ from "jquery";
 import "datatables";
 import { mapActions } from "vuex";
