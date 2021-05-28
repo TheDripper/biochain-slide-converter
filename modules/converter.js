@@ -15,7 +15,6 @@ async function uploadDir(s3Path, bucketName) {
   console.log('dir');
   function walkSync(currentDirPath, callback) {
     fs.readdirSync(currentDirPath).forEach(function(name) {
-      console.log(name);
       var filePath = path.join(currentDirPath, name);
       var stat = fs.statSync(filePath);
       if (stat.isFile()) {
@@ -28,7 +27,6 @@ async function uploadDir(s3Path, bucketName) {
   walkSync(s3Path, async function(filePath, stat) {
     let bucketPath =
       "converted/" + filePath.substring(s3Path.length + 1).replace(/\\/g, "/");
-      console.log(bucketPath);
     let body = fs.readFileSync(filePath);
     let params = {
       Bucket: bucketName,
@@ -37,7 +35,7 @@ async function uploadDir(s3Path, bucketName) {
     };
     let filePush = await s3.putObject(params).promise();
     console.log("push");
-    console.log(filePush);
+    logout.push(filePush);
   });
   console.log('done');
   return logout;
@@ -45,11 +43,7 @@ async function uploadDir(s3Path, bucketName) {
 
 async function convertDzi(slides) {
   console.log(path.join(__dirname, "converted"));
-  let audit = {
-    error: [],
-    success: []
-  };
-  try {
+  let audit = [];
     if (fs.existsSync(path.join(__dirname, "converted"))) {
       fs.rmdirSync(path.join(__dirname, "converted"), { recursive: true });
     }
@@ -61,51 +55,38 @@ async function convertDzi(slides) {
         fs.rmdirSync(path.join(__dirname, "converted/" + filename));
       }
       fs.mkdirSync(path.join(__dirname, "converted/" + filename), 0o777);
-      await sharp("./upload-svs/" + obj, {
+      let sharpResult = await sharp("./upload-svs/" + obj, {
         limitInputPixels: false
       })
         .jpeg()
         .tile({
           size: 512
         })
-        .toFile(path.join(__dirname, "converted/" + filename) + ".dz", function(
-          err,
-          info
-        ) {
-          if (err) {
-            console.log(err);
-            audit.error.push({
-              error: err,
-              slide: filename
-            });
-          } else {
-            console.log(info);
-            audit.success.push({
-              info,
-              slide: filename
-            });
-          }
-        });
+        .toFile(path.join(__dirname, "converted/" + filename) + ".dz");
+        console.log("SHARP RES");
+        console.log(sharpResult);
+        console.log("WOW");
+        audit.push(sharpResult);
     }
-  } catch (err) {
-    console.log(err);
-  }
+    console.log('return');
   return audit;
 }
-const dziSync = util.promisify(convertDzi);
+const convertSync = util.promisify(convertDzi);
 const uploadSync = util.promisify(uploadDir);
 
 export default async function asyncModule() {
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
-  // let auditResult = await dziSync(slides);
+  let auditResult = await convertDzi(slides);
+  console.log(auditResult);
+  console.log('AWS!');
   let awsLog = await uploadSync(
     path.join(__dirname, "converted"),
     "biochain-dev",
     "converted"
   );
   console.log(awsLog);
-  // fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
+  fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
   fs.writeFileSync("./awsLog.json", JSON.stringify(awsLog));
 }
