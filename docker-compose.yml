@@ -1,0 +1,16 @@
+
+version: '3'
+
+services:
+  nodejs:
+    build:
+      context: .
+    command: sh /home/node/app/run.sh 
+    image: nodejs
+    container_name: nodejs
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    volumes:
+      - "./:/home/node/app"
+      - "./node_modules:/home/node/app/node_modules"
