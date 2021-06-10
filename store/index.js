@@ -27,6 +27,7 @@ export const actions = {
   // },
   async fileCheck({ commit }) {},
   async nuxtServerInit({ commit }) {
+    //this.converter();
     let date = live.pop();
     commit("date", date);
     commit("slides", live);

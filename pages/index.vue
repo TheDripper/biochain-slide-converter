@@ -60,6 +60,9 @@ export default {
       });
     }
   },
+  async fetch() {
+    this.converter();
+  },
   computed: {
     slides() {
       return this.$store.state.slides
