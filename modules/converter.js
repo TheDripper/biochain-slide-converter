@@ -75,6 +75,24 @@ const convertSync = util.promisify(convertDzi);
 const uploadSync = util.promisify(uploadDir);
 
 export default async function asyncModule() {
+
+  let params = {
+    Bucket: 'biochain-slide-uploads'
+  }
+  let uploads = await s3.listObjects(params).promise();
+  console.log(uploads);
+  for (let upload of uploads.Contents) {
+    let fileParams = {
+      Bucket: 'biochain-slide-uploads',
+      Key: upload.Key
+    }
+    try {
+      let slide = await s3.getObject(fileParams).promise();
+      fs.writeFileSync('upload-svs/'+upload.Key,slide.Body);
+    } catch (err) {
+      console.log(err);
+    }
+  }
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
