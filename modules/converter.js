@@ -66,7 +66,10 @@ async function convertDzi(slides) {
         console.log("SHARP RES");
         console.log(sharpResult);
         console.log("WOW");
-        audit.push(sharpResult);
+        audit.push({
+          slide: filename,
+          result: sharpResult
+        });
     }
     console.log('return');
   return audit;
@@ -99,12 +102,12 @@ export default async function asyncModule() {
   let auditResult = await convertDzi(slides);
   console.log(auditResult);
   console.log('AWS!');
+  fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
   let awsLog = await uploadSync(
     path.join(__dirname, "converted"),
     "biochain-dev",
     "converted"
   );
   console.log(awsLog);
-  fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
   fs.writeFileSync("./awsLog.json", JSON.stringify(awsLog));
 }

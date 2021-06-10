@@ -1,1 +1,32 @@
-{"error":[],"success":[]}
+[
+  {
+    "slide": "AWSAWS",
+    "result": {
+      "format": "dz",
+      "width": 39221,
+      "height": 53771,
+      "channels": 3,
+      "premultiplied": false
+    }
+  },
+  {
+    "slide": "DDDD",
+    "result": {
+      "format": "dz",
+      "width": 39221,
+      "height": 53771,
+      "channels": 3,
+      "premultiplied": false
+    }
+  },
+  {
+    "slide": "QQQQ",
+    "result": {
+      "format": "dz",
+      "width": 39221,
+      "height": 53771,
+      "channels": 3,
+      "premultiplied": false
+    }
+  }
+]

@@ -1,5 +1,6 @@
 import live from "~/live.json";
 import errors from "~/errors.json";
+import audit from "~/audit.json";
 
 
 export const state = () => ({
@@ -29,6 +30,6 @@ export const actions = {
     let date = live.pop();
     commit("date", date);
     commit("slides", live);
-    commit("errors", errors);
+    commit("errors", audit);
   }
 };

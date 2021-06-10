@@ -10,7 +10,7 @@
       <tbody>
         <tr v-for="error in errors">
           <td>{{ error.slide }}</td>
-          <td>{{ error.error }}</td>
+          <td>{{ error.result }}</td>
         </tr>
       </tbody>
     </table>
