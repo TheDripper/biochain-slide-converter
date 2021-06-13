@@ -1,5 +1,6 @@
 <template>
   <div id="root">
+    <button @click="this.uploadCheck">Run</button>
     <table id="errors" class="w-full p-8">
       <thead>
         <tr>
@@ -8,9 +9,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="error in errors">
-          <td>{{ error.slide }}</td>
-          <td>{{ error.result }}</td>
+        <tr v-for="upload in uploads">
+          <td>{{ upload.upload }}</td>
+          <td>{{ upload.result }}</td>
         </tr>
       </tbody>
     </table>
@@ -48,7 +49,7 @@ import { mapActions } from "vuex";
 
 export default {
   methods: {
-    ...mapActions(["fileCheck"]),
+    ...mapActions(["uploadCheck"]),
   },
   mounted() {
     if (process.browser) {
@@ -60,19 +61,22 @@ export default {
       });
     }
   },
-  async fetch() {
-    this.converter();
+  data() {
+    return {
+      json: {},
+    };
   },
+  // async fetch() {},
   computed: {
     slides() {
-      return this.$store.state.slides
+      return this.$store.state.slides;
     },
-    errors() {
-      return this.$store.state.errors
+    uploads() {
+      return this.$store.state.uploads;
     },
     date() {
-      return this.$store.state.date
-    }
+      return this.$store.state.date;
+    },
   },
 };
 </script>
