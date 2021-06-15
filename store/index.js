@@ -22,7 +22,7 @@ export const mutations = {
 };
 export const actions = {
   async uploadCheck({ commit }){
-      let { data } = await this.$axios("/server-middleware/getJSON");
+      let { data } = await this.$axios("http://localhost:3000/server-middleware/getJSON");
       console.log('uploads done! store');
       commit("uploads",data)
   },
