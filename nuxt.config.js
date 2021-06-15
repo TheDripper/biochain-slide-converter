@@ -47,7 +47,8 @@ export default {
   ],
   proxy: {
     // '/wp-json': 'https://79d801e6b0b6.ngrok.io'
-    "/wp": "https://biochain.s3-us-west-1.amazonaws.com/"
+    "/wp": "https://biochain.s3-us-west-1.amazonaws.com/",
+    "/server-middleware":"http://localhost:3000/server-middleware"
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},
