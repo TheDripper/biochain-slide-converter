@@ -46,8 +46,7 @@ const convertSync = util.promisify(convertDzi);
 
 async function main() {
   console.log("run");
-  let uploads = [];
-  function read(dir, dirPath) {
+  function read(dir, dirPath, uploads) {
     console.log("read");
     // console.log("read:" + dir);
     // console.log("dirPath: " + dirPath);
@@ -64,15 +63,15 @@ async function main() {
       try {
         let stat = fs.statSync(name);
         if (stat.isFile()) {
-          upload(name);
+          uploads.push(upload(name));
         } else {
-          read(name, target);
+          read(name, target, uploads);
         }
       } catch (err) {
         console.log(err);
       }
     }
-    return;
+    return uploads;
   }
   async function upload(filePath) {
     console.log("upload");
@@ -86,37 +85,32 @@ async function main() {
       Body: body
     };
     let filePush = await s3.putObject(params).promise();
-    uploads.push(filePush);
-    return;
+    return filePush;
   }
-  // let params = {
-  //   Bucket: "biochain-slide-uploads"
-  // };
-  // let uploads = await s3.listObjects(params).promise();
-  // for (let upload of uploads.Contents) {
-  //   let fileParams = {
-  //     Bucket: "biochain-slide-uploads",
-  //     Key: upload.Key
-  //   };
-  //   try {
-  //     let slide = await s3.getObject(fileParams).promise();
-  //     fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
-  //   } catch (err) {
-  //   }
-  // }
-  // let slides = fs
-  //   .readdirSync("./upload-svs")
-  //   .filter(slide => slide.endsWith(".svs"));
-  // let auditResult = await convertDzi(slides);
-  // fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
+  let params = {
+    Bucket: "biochain-slide-uploads"
+  };
+  let uploads = await s3.listObjects(params).promise();
+  for (let upload of uploads.Contents) {
+    let fileParams = {
+      Bucket: "biochain-slide-uploads",
+      Key: upload.Key
+    };
+    try {
+      let slide = await s3.getObject(fileParams).promise();
+      fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
+    } catch (err) {
+    }
+  }
+  let slides = fs
+    .readdirSync("./upload-svs")
+    .filter(slide => slide.endsWith(".svs"));
+  let auditResult = await convertDzi(slides);
+  fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
   try {
-    // let awsLog = await uploadSync(
-    //   path.join(__dirname,"converted"),
-    //   "biochain-dev",
-    //   "converted"
-    // );
-    read("converted", __dirname);
+    let uploads = read("converted", __dirname,[]);
     console.log('return uploads');
+    console.log(uploads);
     return uploads;
   } catch (err) {
     console.log(err);
@@ -127,7 +121,7 @@ async function main() {
 }
 app.use(bodyParser.json());
 app.all("/getJSON", async (req, res) => {
-  let audit = await main();
+  let audit = await Promise.all([main()]); 
   console.log(audit);
   console.log("UPLOADS DONE");
   res.json({ data: audit });
