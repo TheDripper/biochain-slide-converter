@@ -44,45 +44,51 @@ async function convertDzi(slides) {
 const convertSync = util.promisify(convertDzi);
 //const uploadSync = util.promisify(uploadDir);
 
-function read(dir,dirPath) {
-  // console.log("read:"+dir);
-  // console.log("dirPath: "+dirPath);
-  let target = path.resolve(dirPath,dir);
-  let names = fs.readdirSync(target);
-  // console.log("target:"+target);
-  // console.log("names:"+names);
-  for (let file of names) {
-    console.log("file: "+file);
-    console.log("target: "+target);
-    console.log("dirPath: "+dirPath);
-    let name = path.resolve(target, file);
-    console.log("name: "+name);
-    try {
-      let stat = fs.statSync(name);
-      if (stat.isFile()) {
-        upload(name);
-      } else {
-        read(name,target);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-}
-async function upload(filePath) {
-  let bucketPath =
-    "converted/" + filePath.substring(filePath.length + 1).replace(/\\/g, "/");
-  let body = fs.readFileSync(filePath);
-  let params = {
-    Bucket: "biochain-dev",
-    Key: bucketPath,
-    Body: body
-  };
-  let filePush = await s3.putObject(params).promise();
-  return filePush;
-}
-
 async function main() {
+  console.log("run");
+  let uploads = [];
+  function read(dir, dirPath) {
+    console.log("read");
+    // console.log("read:" + dir);
+    // console.log("dirPath: " + dirPath);
+    let target = path.resolve(dirPath, dir);
+    let names = fs.readdirSync(target);
+    // console.log("target:" + target);
+    // console.log("names:" + names);
+    for (let file of names) {
+      //console.log("file: "+file);
+      //console.log("target: "+target);
+      //console.log("dirPath: "+dirPath);
+      let name = path.resolve(target, file);
+      //console.log("name: "+name);
+      try {
+        let stat = fs.statSync(name);
+        if (stat.isFile()) {
+          upload(name);
+        } else {
+          read(name, target);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    return;
+  }
+  async function upload(filePath) {
+    console.log("upload");
+    let bucketPath =
+      "converted/" +
+      filePath.substring(filePath.length + 1).replace(/\\/g, "/");
+    let body = fs.readFileSync(filePath);
+    let params = {
+      Bucket: "biochain-dev",
+      Key: bucketPath,
+      Body: body
+    };
+    let filePush = await s3.putObject(params).promise();
+    uploads.push(filePush);
+    return;
+  }
   // let params = {
   //   Bucket: "biochain-slide-uploads"
   // };
@@ -109,19 +115,21 @@ async function main() {
     //   "biochain-dev",
     //   "converted"
     // );
-    read("converted",__dirname);
+    read("converted", __dirname);
+    console.log('return uploads');
+    return uploads;
   } catch (err) {
+    console.log(err);
     // fs.writeFileSync("./awsLog.json", JSON.stringify(awsLog));
   }
-  return "return";
   //
   // return auditResult;
 }
 app.use(bodyParser.json());
 app.all("/getJSON", async (req, res) => {
   let audit = await main();
-  console.log("UPLOADS DONE");
   console.log(audit);
+  console.log("UPLOADS DONE");
   res.json({ data: audit });
 });
 
