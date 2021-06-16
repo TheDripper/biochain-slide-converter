@@ -1,13 +1,13 @@
 const bodyParser = require("body-parser");
-const app = require("express")();
-
-var AWS = require("aws-sdk");
+const express = require("express");
+const app = express();
 const sharp = require("sharp");
 const fs = require("fs-extra");
 const path = require("path");
 const rimraf = require("rimraf");
 const util = require("util");
 const csv = require("csvtojson");
+const AWS = require("aws-sdk");
 
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KQIFS6VRG",
@@ -99,17 +99,16 @@ async function main() {
     try {
       let slide = await s3.getObject(fileParams).promise();
       fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
-    } catch (err) {
-    }
+    } catch (err) {}
   }
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
-  let auditResult = await convertDzi(slides);
+  let auditResult = await convertSync(slides);
   fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
   try {
-    let uploads = read("converted", __dirname,[]);
-    console.log('return uploads');
+    let uploads = read("converted", __dirname, []);
+    console.log("return uploads");
     console.log(uploads);
     return uploads;
   } catch (err) {
@@ -119,12 +118,41 @@ async function main() {
   //
   // return auditResult;
 }
-app.use(bodyParser.json());
-app.all("/getJSON", async (req, res) => {
-  let audit = await Promise.all([main()]); 
-  console.log(audit);
-  console.log("UPLOADS DONE");
-  res.json({ data: audit });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.all("/slides", async (req, res) => {
+  const params = {
+    Bucket: "biochain-slide-uploads"
+  };
+  try {
+    let uploads = await s3.listObjects(params).promise();
+    res.json({ data: uploads });
+  } catch (err) {
+    console.log(err);
+  }
+});
+app.post("/download", async (req, res) => {
+  let writes = [];
+  for (let upload of req.body.uploads) {
+    let fileParams = {
+      Bucket: "biochain-slide-uploads",
+      Key: upload.Key
+    };
+    try {
+      let slide = await s3.getObject(fileParams).promise();
+      fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
+      writes.push(upload.Key);
+      console.log("loop done");
+      console.log(writes);
+      res.json({ data: writes });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+});
+app.post("/convert", async (req, res) => {
+  let converted = await convertSync(req.params.slides);
+  res.json({ data: converted });
 });
 
 module.exports = app;

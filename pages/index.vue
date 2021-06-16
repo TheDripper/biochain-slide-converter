@@ -1,6 +1,8 @@
 <template>
   <div id="root">
-    <button @click="this.uploadCheck">Run</button>
+    <button @click="this.getSlides">Get Slides</button>
+    <button @click="this.convert">Convert</button>
+    <h1 class="text-3xl">{{ status }}</h1>
     <table id="errors" class="w-full p-8">
       <thead>
         <tr>
@@ -10,8 +12,8 @@
       </thead>
       <tbody>
         <tr v-for="upload in uploads">
-          <td>{{ upload.upload }}</td>
-          <td>{{ upload.result }}</td>
+          <td>{{ upload }}</td>
+          <td>{{ upload }}</td>
         </tr>
       </tbody>
     </table>
@@ -46,10 +48,19 @@
 import $ from "jquery";
 import "datatables";
 import { mapActions } from "vuex";
+const AWS = require("aws-sdk");
+
+const s3 = new AWS.S3({
+  accessKeyId: "AKIA4EV32R5KQIFS6VRG",
+  secretAccessKey: "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",
+});
 
 export default {
   methods: {
-    ...mapActions(["uploadCheck"]),
+    callUploads() {
+      this.status = "uploading";
+    },
+    ...mapActions(["uploadCheck", "getSlides", "convert"]),
   },
   mounted() {
     if (process.browser) {
@@ -64,6 +75,7 @@ export default {
   data() {
     return {
       json: {},
+      status: "Ready to upload slides",
     };
   },
   // async fetch() {},
@@ -81,6 +93,14 @@ export default {
 };
 </script>
 <style>
+button {
+  width: 100px;
+  height: 50px;
+  background: black;
+  color: white;
+  @apply rounded;
+  cursor: pointer;
+}
 th,
 td {
   @apply w-1/4 p-2 border;

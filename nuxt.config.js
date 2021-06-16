@@ -12,9 +12,10 @@ export default {
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
   },
-  server: {
-    host: "0.0.0.0"
-  },
+  // server: {
+  //   // host: "0.0.0.0"
+  //   host: 'localhost'
+  // },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
@@ -47,11 +48,12 @@ export default {
   ],
   proxy: {
     // '/wp-json': 'https://79d801e6b0b6.ngrok.io'
-    "/wp": "https://biochain.s3-us-west-1.amazonaws.com/",
-    "/server-middleware":"http://localhost:3000/server-middleware"
+    "/s3": "https://biochain.s3-us-west-1.amazonaws.com/",
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  //axios: {
+  //  baseURL: "http://localhost:3000"
+  //},
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
