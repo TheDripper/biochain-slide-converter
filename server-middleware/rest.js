@@ -20,13 +20,14 @@ async function convertDzi(slides) {
     fs.rmdirSync(path.join(__dirname, "converted"), { recursive: true });
   }
   fs.mkdirSync(path.join(__dirname, "converted"), 0o777);
+  console.log(slides);
   for (let obj of slides) {
-    let filename = obj.slice(0, -4);
+    let filename = obj.Key.slice(0, -4);
     if (fs.existsSync("converted/" + filename)) {
       fs.rmdirSync("converted/" + filename);
     }
     fs.mkdirSync(path.join(__dirname, "converted", filename), 0o777);
-    let sharpResult = await sharp("./upload-svs/" + obj, {
+    let sharpResult = await sharp("./upload-svs/" + obj.Key, {
       limitInputPixels: false
     })
       .jpeg()
@@ -41,7 +42,7 @@ async function convertDzi(slides) {
   }
   return audit;
 }
-const convertSync = util.promisify(convertDzi);
+// const convertSync = util.promisify(convertDzi);
 //const uploadSync = util.promisify(uploadDir);
 
 async function main() {
@@ -104,17 +105,15 @@ async function main() {
   let slides = fs
     .readdirSync("./upload-svs")
     .filter(slide => slide.endsWith(".svs"));
-  let auditResult = await convertSync(slides);
-  fs.writeFileSync("./audit.json", JSON.stringify(auditResult));
-  try {
-    let uploads = read("converted", __dirname, []);
-    console.log("return uploads");
-    console.log(uploads);
-    return uploads;
-  } catch (err) {
-    console.log(err);
-    // fs.writeFileSync("./awsLog.json", JSON.stringify(awsLog));
-  }
+  // try {
+  //   let uploads = read("converted", __dirname, []);
+  //   console.log("return uploads");
+  //   console.log(uploads);
+  //   return uploads;
+  // } catch (err) {
+  //   console.log(err);
+  //   // fs.writeFileSync("./awsLog.json", JSON.stringify(awsLog));
+  // }
   //
   // return auditResult;
 }
@@ -151,7 +150,8 @@ app.post("/download", async (req, res) => {
   }
 });
 app.post("/convert", async (req, res) => {
-  let converted = await convertSync(req.params.slides);
+  let converted = await convertDzi(req.body.slides);
+  console.log(converted);
   res.json({ data: converted });
 });
 
