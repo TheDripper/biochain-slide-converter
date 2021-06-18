@@ -2,6 +2,7 @@
   <div id="root">
     <button @click="this.getSlides">Get Slides</button>
     <button @click="this.convert">Convert</button>
+    <button @click="this.upload">Upload</button>
     <h1 class="text-3xl">{{ status }}</h1>
     <table id="errors" class="w-full p-8">
       <thead>
@@ -60,7 +61,7 @@ export default {
     callUploads() {
       this.status = "uploading";
     },
-    ...mapActions(["uploadCheck", "getSlides", "convert"]),
+    ...mapActions(["uploadCheck", "getSlides", "convert", "upload"]),
   },
   mounted() {
     if (process.browser) {

@@ -8,6 +8,7 @@ const rimraf = require("rimraf");
 const util = require("util");
 const csv = require("csvtojson");
 const AWS = require("aws-sdk");
+const zlib = require("zlib");
 
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KQIFS6VRG",
@@ -47,47 +48,7 @@ async function convertDzi(slides) {
 
 async function main() {
   console.log("run");
-  function read(dir, dirPath, uploads) {
-    console.log("read");
-    // console.log("read:" + dir);
-    // console.log("dirPath: " + dirPath);
-    let target = path.resolve(dirPath, dir);
-    let names = fs.readdirSync(target);
-    // console.log("target:" + target);
-    // console.log("names:" + names);
-    for (let file of names) {
-      //console.log("file: "+file);
-      //console.log("target: "+target);
-      //console.log("dirPath: "+dirPath);
-      let name = path.resolve(target, file);
-      //console.log("name: "+name);
-      try {
-        let stat = fs.statSync(name);
-        if (stat.isFile()) {
-          uploads.push(upload(name));
-        } else {
-          read(name, target, uploads);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    return uploads;
-  }
-  async function upload(filePath) {
-    console.log("upload");
-    let bucketPath =
-      "converted/" +
-      filePath.substring(filePath.length + 1).replace(/\\/g, "/");
-    let body = fs.readFileSync(filePath);
-    let params = {
-      Bucket: "biochain-dev",
-      Key: bucketPath,
-      Body: body
-    };
-    let filePush = await s3.putObject(params).promise();
-    return filePush;
-  }
+
   let params = {
     Bucket: "biochain-slide-uploads"
   };
@@ -153,6 +114,62 @@ app.post("/convert", async (req, res) => {
   let converted = await convertDzi(req.body.slides);
   console.log(converted);
   res.json({ data: converted });
+});
+app.all("/upload", async (req, res) => {
+  let uploads = [];
+  function read(dir, dirPath, uploads) {
+    console.log("read");
+    // console.log("read:" + dir);
+    // console.log("dirPath: " + dirPath);
+    let target = path.resolve(dirPath, dir);
+    console.log("dirPath: " + dirPath);
+    console.log("dir: " + dir);
+    let names = fs.readdirSync(target);
+    // console.log("target:" + target);
+    // console.log("names:" + names);
+    for (let file of names) {
+      //console.log("file: "+file);
+      //console.log("target: "+target);
+      //console.log("dirPath: "+dirPath);
+      let name = path.resolve(target, file);
+      let key = name.split("server-middleware/")[1];
+      //console.log("name: "+name);
+      try {
+        let stat = fs.statSync(name);
+        if (stat.isFile()) {
+          upload(name, key, uploads);
+        } else {
+          read(name, target, uploads);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+  async function upload(name, key) {
+    console.log("upload");
+    console.log("name: " + name);
+    console.log(path.parse(name));
+    // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
+    // let body = fs.readFileSync(name);
+    console.log("key :" + key);
+    let body = fs.createReadStream(name).pipe(zlib.createGzip());
+    try {
+      s3.upload({ Bucket: "biochain-dev", Body: body, Key: key })
+        .on("httpUploadProgress", function(evt) {
+          console.log("Progress:", evt.loaded, "/", evt.total);
+        })
+        .send(function(err, data) {
+          console.log(err, data);
+          uploads.push({ err, data });
+        });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  read("converted", "./server-middleware", []);
+  console.log(uploads);
+  res.json({ data: uploads });
 });
 
 module.exports = app;

@@ -21,9 +21,16 @@ export const mutations = {
   },
   converted(state, converted) {
     state.converted = converted;
+  },
+  audit(state, audit) {
+    state.audit = audit;
   }
 };
 export const actions = {
+  async upload({commit}) {
+    let { data } = await this.$axios("/server-middleware/upload");
+    console.log('upload done');
+  },
   async getSlides({ commit, store }) {
     let { data } = await this.$axios("/server-middleware/slides");
     let uploads = data.data.Contents;
@@ -38,6 +45,7 @@ export const actions = {
   async uploadCheck({ commit }) {
     let { data } = await this.$axios("/server-middleware/getJSON");
     console.log("uploads done! store");
+    commit("audit", data);
   },
   async convert({ commit, store }) {
     let slides = this.state.uploads;
