@@ -61,8 +61,8 @@ export default {
     callUploads() {
       this.status = "uploading";
     },
-    uploadSlides() {
-      let uploadResult = this.$axios("/server-middleware/upload");
+    async uploadSlides() {
+      let uploadResult = await this.$axios("/server-middleware/upload");
       console.log('result!!');
       console.log(uploadResult);
     },
