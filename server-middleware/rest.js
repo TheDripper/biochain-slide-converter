@@ -127,9 +127,12 @@ app.all("/upload", async (req, res) => {
         .send(function(err, data) {
           // console.log(err, data);
           let uploadResult = {
+            name,
+            key,
             err,
             data
           };
+          logfile.write(JSON.stringify(uploadResult));
           return;
         });
     } catch (err) {
