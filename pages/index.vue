@@ -2,7 +2,7 @@
   <div id="root">
     <button @click="this.getSlides">Get Slides</button>
     <button @click="this.convert">Convert</button>
-    <button @click="this.upload">Upload</button>
+    <button @click="uploadSlides">Upload</button>
     <h1 class="text-3xl">{{ status }}</h1>
     <table id="errors" class="w-full p-8">
       <thead>
@@ -60,6 +60,11 @@ export default {
   methods: {
     callUploads() {
       this.status = "uploading";
+    },
+    uploadSlides() {
+      let uploadResult = this.$axios("/server-middleware/upload");
+      console.log('result!!');
+      console.log(uploadResult);
     },
     ...mapActions(["uploadCheck", "getSlides", "convert", "upload"]),
   },

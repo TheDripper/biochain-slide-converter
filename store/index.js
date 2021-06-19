@@ -27,20 +27,20 @@ export const mutations = {
   }
 };
 export const actions = {
-  async upload({commit}) {
-    let { data } = await this.$axios("/server-middleware/upload");
-    console.log('upload done');
-  },
   async getSlides({ commit, store }) {
     let { data } = await this.$axios("/server-middleware/slides");
     let uploads = data.data.Contents;
-    commit("uploads", uploads);
     let written = await this.$axios.post("/server-middleware/download", {
       uploads
     });
+    commit("uploads", uploads);
+    let slides = await this.$axios.post("/server-middleware/convert", {
+      slides: uploads
+    });
+    slides = slides.data;
+    commit("converted", slides);
     console.log("axios post");
-    console.log(written);
-    return;
+    // this.$axios("/server-middleware/upload");
   },
   async uploadCheck({ commit }) {
     let { data } = await this.$axios("/server-middleware/getJSON");

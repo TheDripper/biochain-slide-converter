@@ -137,7 +137,7 @@ app.all("/upload", async (req, res) => {
       try {
         let stat = fs.statSync(name);
         if (stat.isFile()) {
-          upload(name, key, uploads);
+          uploads.push(upload(name, key));
         } else {
           read(name, target, uploads);
         }
@@ -146,7 +146,7 @@ app.all("/upload", async (req, res) => {
       }
     }
   }
-  async function upload(name, key) {
+  function upload(name, key) {
     console.log("upload");
     console.log("name: " + name);
     console.log(path.parse(name));
@@ -156,20 +156,22 @@ app.all("/upload", async (req, res) => {
     let body = fs.createReadStream(name).pipe(zlib.createGzip());
     try {
       s3.upload({ Bucket: "biochain-dev", Body: body, Key: key })
-        .on("httpUploadProgress", function(evt) {
+      .on("httpUploadProgress", function(evt) {
           console.log("Progress:", evt.loaded, "/", evt.total);
         })
         .send(function(err, data) {
           console.log(err, data);
-          uploads.push({ err, data });
+          let uploadResult = {
+            err,
+            data
+          };
         });
     } catch (err) {
       console.log(err);
     }
   }
   read("converted", "./server-middleware", []);
-  console.log(uploads);
-  res.json({ data: uploads });
+  res.end('uploading files...');
 });
 
 module.exports = app;
