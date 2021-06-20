@@ -85,8 +85,9 @@ app.post("/convert", async (req, res) => {
 });
 app.all("/upload", async (req, res) => {
   let uploads = [];
-  function read(dir, dirPath) {
-    console.log("read");
+  const readSync = util.promisify(read);
+  async function read(dir, dirPath) {
+    console.log("calling read: " + dir + ", " + dirPath);
     // console.log("read:" + dir);
     // console.log("dirPath: " + dirPath);
     let target = path.resolve(dirPath, dir);
@@ -100,51 +101,54 @@ app.all("/upload", async (req, res) => {
       let name = path.resolve(target, file);
       let key = name.split("server-middleware/")[1];
       //console.log("name: "+name);
-      try {
-        let stat = fs.statSync(name);
-        if (stat.isFile()) {
-          upload(name, key);
-        } else {
-          read(name, target);
-        }
-      } catch (err) {
-        console.log(err);
+      let stat = fs.statSync(name);
+      if (stat.isFile()) {
+        uploadSync(name, key);
+        console.log("after upload ");
+      } else {
+        readSync(name, target);
+        console.log("after read ");
       }
     }
+    console.log("after for");
     return;
   }
-  // let readAll = util.promisify(read);
   let uploadSync = util.promisify(upload);
-  function upload(name, key) {
+
+  async function upload(name, key) {
+    console.log("calling upload, name: " + name + ", key: " + key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
     // let body = fs.readFileSync(name);
     let body = fs.createReadStream(name).pipe(zlib.createGzip());
-    try {
-      s3.upload({ Bucket: "biochain-dev", Body: body, Key: key })
-        .on("httpUploadProgress", function(evt) {
-          console.log("Progress-> "+key+":", evt.loaded, "/", evt.total);
-        })
-        .send(function(err, data) {
-          // console.log(err, data);
-          let uploadResult = {
-            name,
-            key,
-            err,
-            data
-          };
-          logfile.write(JSON.stringify(uploadResult));
-          return;
-        });
-    } catch (err) {
-      console.log(err);
-    }
+    s3.upload({
+      Bucket: "biochain-dev",
+      Body: body,
+      Key: key
+    })
+      .on("httpUploadProgress", function(evt) {
+        console.log("Progress-> " + key + ":", evt.loaded, "/", evt.total);
+      })
+      .send(function(err, data) {
+        // console.log(err, data);
+        let uploadResult = {
+          name,
+          key,
+          err,
+          data
+        };
+        console.log("upload result: " + JSON.stringify(uploadResult));
+      });
+      console.log('upload return');
   }
-  let logfile = fs.createWriteStream("logfile.json");
-  const readSync = util.promisify(read);
-  await readSync("converted", "./server-middleware");
-  console.log("writing uploads: " + JSON.stringify(uploads));
-  logfile.write(JSON.stringify(uploads));
-  res.json(uploads);
+  try {
+    let logfile = fs.createWriteStream("logfile.json");
+    await readSync("converted", "./server-middleware");
+    console.log("writing uploads: " + JSON.stringify(uploads));
+    logfile.write(JSON.stringify(uploads));
+    res.json(uploads);
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 module.exports = app;
