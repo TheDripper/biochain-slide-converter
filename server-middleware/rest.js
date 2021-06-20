@@ -103,19 +103,18 @@ app.all("/upload", async (req, res) => {
       //console.log("name: "+name);
       let stat = fs.statSync(name);
       if (stat.isFile()) {
-        uploadSync(name, key);
+        upload(name, key);
         console.log("after upload ");
       } else {
-        readSync(name, target);
+        read(name, target);
         console.log("after read ");
       }
     }
     console.log("after for");
-    return;
   }
   let uploadSync = util.promisify(upload);
 
-  async function upload(name, key) {
+  function upload(name, key) {
     console.log("calling upload, name: " + name + ", key: " + key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
     // let body = fs.readFileSync(name);
@@ -137,8 +136,15 @@ app.all("/upload", async (req, res) => {
           data
         };
         console.log("upload result: " + JSON.stringify(uploadResult));
+        if (path.extname(key) == ".dzi") {
+          let logname = path.basename(key).slice(0, -4);
+          fs.writeFileSync(
+            "./server-middleware/upload-logs/" + logname + ".json",
+            JSON.stringify(uploadResult)
+          );
+        }
       });
-      console.log('upload return');
+    console.log("upload return");
   }
   try {
     let logfile = fs.createWriteStream("logfile.json");
