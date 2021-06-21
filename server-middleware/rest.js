@@ -54,6 +54,7 @@ app.all("/slides", async (req, res) => {
   };
   try {
     let uploads = await s3.listObjects(params).promise();
+    console.log(uploads);
     res.json({ data: uploads });
   } catch (err) {
     console.log(err);
@@ -129,11 +130,13 @@ app.all("/upload", async (req, res) => {
       })
       .send(function(err, data) {
         // console.log(err, data);
+        let date = new Date().toJSON().slice(0,10).replace(/-/g,'/');
         let uploadResult = {
           name,
           key,
           err,
-          data
+          data,
+          date
         };
         console.log("upload result: " + JSON.stringify(uploadResult));
         if (path.extname(key) == ".dzi") {
@@ -148,10 +151,8 @@ app.all("/upload", async (req, res) => {
   }
   try {
     let logfile = fs.createWriteStream("logfile.json");
-    await readSync("converted", "./server-middleware");
-    console.log("writing uploads: " + JSON.stringify(uploads));
-    logfile.write(JSON.stringify(uploads));
-    res.json(uploads);
+    let readCall = readSync("converted", "./server-middleware");
+    res.json(readSync);
   } catch (err) {
     console.log(err);
   }

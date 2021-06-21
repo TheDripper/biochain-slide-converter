@@ -37,7 +37,7 @@ export default {
   buildModules: [
     // https://go.nuxtjs.dev/tailwindcss
     "@nuxtjs/tailwindcss",
-    // "~/modules/converter.js"
+    "~/modules/slide-list.js"
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules

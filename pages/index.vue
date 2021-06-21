@@ -4,6 +4,21 @@
     <button @click="this.convert">Convert</button>
     <button @click="uploadSlides">Upload</button>
     <h1 class="text-3xl">{{ status }}</h1>
+    <table id="logs" class="w-full p-8" v-if="logs.length">
+      <thead>
+        <tr>
+          <th>Slide</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="log in logs">
+          <td>{{ log.key }}</td>
+          <td v-if="log.err" class="text-red">Error: {{ log.err }}</td>
+          <td class="text-green" v-else>Success: {{ log.data.Location }}</td>
+        </tr>
+      </tbody>
+    </table>
     <table id="errors" class="w-full p-8">
       <thead>
         <tr>
@@ -95,6 +110,9 @@ export default {
     date() {
       return this.$store.state.date;
     },
+    logs() {
+      return this.$store.state.logs;
+    }
   },
 };
 </script>

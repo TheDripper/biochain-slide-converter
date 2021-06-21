@@ -1,4 +1,5 @@
 import live from "~/live.json";
+import logs from "~/imports.json";
 // import errors from "~/errors.json";
 // import audit from "~/audit.json";
 
@@ -24,6 +25,9 @@ export const mutations = {
   },
   audit(state, audit) {
     state.audit = audit;
+  },
+  logs(state, audit) {
+    state.logs = logs;
   }
 };
 export const actions = {
@@ -59,6 +63,8 @@ export const actions = {
     //this.converter();
     let date = live.pop();
     commit("date", date);
+    console.log(logs);
     commit("slides", live);
+    commit("logs",logs);
   }
 };
