@@ -9,6 +9,7 @@
         <tr>
           <th>Slide</th>
           <th>Status</th>
+          <th>Date</th>
         </tr>
       </thead>
       <tbody>
@@ -16,6 +17,7 @@
           <td>{{ log.key }}</td>
           <td v-if="log.err" class="text-red">Error: {{ log.err }}</td>
           <td class="text-green" v-else>Success: {{ log.data.Location }}</td>
+          <td>{{ log.date }}</td>
         </tr>
       </tbody>
     </table>
