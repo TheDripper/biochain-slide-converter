@@ -7,6 +7,5 @@ services:
     image: bc_converter
     ports:
       - 3000:3000
-    command: sh -c "cd home && npm run dev"
     volumes:
       - "./:/home"
