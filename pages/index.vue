@@ -1,9 +1,8 @@
 <template>
   <div id="root">
-    <button @click="this.getSlides">Get Slides</button>
-    <button @click="this.convert">Convert</button>
-    <button @click="uploadSlides">Upload</button>
-    <h1 class="text-3xl">{{ status }}</h1>
+    <button @click="this.getSlides">Convert Slides</button>
+    <button @click="uploadSlides">Upload Slides</button>
+    <h2 class="text-center text-xl">Convert</h2>
     <table id="logs" class="w-full p-8" v-if="logs.length">
       <thead>
         <tr>
@@ -146,5 +145,8 @@ td {
 a {
   color: blue;
   text-decoration: underline;
+}
+button {
+  font-size: 12px;
 }
 </style>
