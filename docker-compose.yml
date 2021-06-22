@@ -5,8 +5,12 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+    deploy: 
+      resources:
+        limits:
+          memory: 4GB
     image: bc_converter
-    command: sh -c "npm run dev --loglevel verbose"
+    command: sh -c "npm install -g nuxt && npm run dev"
     ports:
       - 3000:3000
     volumes:
