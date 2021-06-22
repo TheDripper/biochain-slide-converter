@@ -1,13 +1,12 @@
 version: '3'
 
-services:
-  node:
-    image: node:14
+services: 
+  biochain:
     build:
-      context: .
-    command: sh -c "cd home/node/app && npm run dev" 
+      dockerfile: Dockerfile
+    image: bc_converter
     ports:
-      - "3000:3000"
+      - 3000:3000
+    command: sh -c "cd home && npm run dev"
     volumes:
-      - "./:/home/node/app"
-      - "./node_modules:/home/node/app/node_modules"
+      - "./:/home"

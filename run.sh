@@ -1,3 +1,5 @@
 #!/bin/bash
 cd home/node/app
-npm run dev
+ls
+# npm install sharp
+# npm run dev
