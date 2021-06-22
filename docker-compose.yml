@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       context: .
     image: bc_converter
-    command: sh -c "npm start"
+    command: sh -c "npm run dev --loglevel verbose"
     ports:
       - 3000:3000
     volumes:

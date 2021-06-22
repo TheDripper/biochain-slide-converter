@@ -24,11 +24,13 @@ async function convertDzi(slides) {
   console.log(slides);
   for (let obj of slides) {
     let filename = obj.Key.slice(0, -4);
+    console.log(filename);
     if (fs.existsSync("converted/" + filename)) {
       fs.rmdirSync("converted/" + filename);
     }
     fs.mkdirSync(path.join(__dirname, "converted", filename), 0o777);
-    let sharpResult = await sharp("./upload-svs/" + obj.Key, {
+    console.log("mkdir");
+    sharp("./upload-svs/" + obj.Key, {
       limitInputPixels: false
     })
       .jpeg()
@@ -36,14 +38,10 @@ async function convertDzi(slides) {
         size: 512
       })
       .toFile(path.join(__dirname, "converted", filename, filename + ".dz"));
-    audit.push({
-      slide: filename,
-      result: sharpResult
-    });
+    console.log("after sharp");
   }
-  return audit;
 }
-// const convertSync = util.promisify(convertDzi);
+const convertSync = util.promisify(convertDzi);
 //const uploadSync = util.promisify(uploadDir);
 
 app.use(express.json());
@@ -80,14 +78,18 @@ app.post("/download", async (req, res) => {
   }
 });
 app.post("/convert", async (req, res) => {
-  let converted = await convertDzi(req.body.slides);
-  console.log(converted);
-  res.json({ data: converted });
+  try {
+    console.log('convert rest');
+    convertDzi(req.body.slides);
+    res.json({ data: "converting..." });
+  } catch (err) {
+    console.log(err);
+  }
 });
 app.all("/upload", async (req, res) => {
   let uploads = [];
   const readSync = util.promisify(read);
-  async function read(dir, dirPath) {
+  function read(dir, dirPath) {
     console.log("calling read: " + dir + ", " + dirPath);
     // console.log("read:" + dir);
     // console.log("dirPath: " + dirPath);
@@ -113,8 +115,6 @@ app.all("/upload", async (req, res) => {
     }
     console.log("after for");
   }
-  let uploadSync = util.promisify(upload);
-
   function upload(name, key) {
     console.log("calling upload, name: " + name + ", key: " + key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
@@ -130,7 +130,10 @@ app.all("/upload", async (req, res) => {
       })
       .send(function(err, data) {
         // console.log(err, data);
-        let date = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+        let date = new Date()
+          .toJSON()
+          .slice(0, 10)
+          .replace(/-/g, "/");
         let uploadResult = {
           name,
           key,
@@ -146,13 +149,13 @@ app.all("/upload", async (req, res) => {
             JSON.stringify(uploadResult)
           );
         }
+        console.log("upload return");
+        return;
       });
-    console.log("upload return");
   }
   try {
-    let logfile = fs.createWriteStream("logfile.json");
-    let readCall = readSync("converted", "./server-middleware");
-    res.json(readSync);
+    read("converted", "./server-middleware");
+    res.json({ data: "uploading" });
   } catch (err) {
     console.log(err);
   }

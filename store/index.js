@@ -38,12 +38,10 @@ export const actions = {
       uploads
     });
     commit("uploads", uploads);
-    let slides = await this.$axios.post("/server-middleware/convert", {
+    this.$axios.post("/server-middleware/convert", {
       slides: uploads
     });
-    slides = slides.data;
-    commit("converted", slides);
-    console.log("axios post");
+    // console.log("axios post");
     // this.$axios("/server-middleware/upload");
   },
   async uploadCheck({ commit }) {
@@ -53,10 +51,10 @@ export const actions = {
   },
   async convert({ commit, store }) {
     let slides = this.state.uploads;
-    let { data } = await this.$axios.post("/server-middleware/convert", {
+    this.$axios.post("/server-middleware/convert", {
       slides
     });
-    commit("converted", data);
+    commit("converted", slides);
   },
   async fileCheck({ commit }) {},
   async nuxtServerInit({ commit }) {
