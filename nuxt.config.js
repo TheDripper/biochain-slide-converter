@@ -43,7 +43,8 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     "@nuxtjs/axios",
-    "@nuxtjs/proxy"
+    "@nuxtjs/proxy",
+    "@nuxtjs/content"
   ],
   proxy: {
     // '/wp-json': 'https://79d801e6b0b6.ngrok.io'

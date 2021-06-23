@@ -38,6 +38,7 @@ export const actions = {
       uploads
     });
     commit("uploads", uploads);
+    console.log('convert store');
     this.$axios.post("/server-middleware/convert", {
       slides: uploads
     });
@@ -61,7 +62,6 @@ export const actions = {
     //this.converter();
     let date = live.pop();
     commit("date", date);
-    console.log(logs);
     commit("slides", live);
     commit("logs",logs);
   }
