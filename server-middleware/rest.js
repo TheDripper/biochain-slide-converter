@@ -67,7 +67,7 @@ app.post("/download", async (req, res) => {
       console.log(err);
     }
   }
-  res.json({data:writes});
+  res.json({ data: writes });
 });
 app.post("/convert", async (req, res) => {
   try {
@@ -94,11 +94,11 @@ app.all("/upload", async (req, res) => {
         read(name, target, uploads);
       }
     }
-    console.log('return uploads');
+    console.log("return uploads");
     return uploads;
   }
   async function upload(name, key, uploads) {
-    console.log('Upload',key);
+    console.log("Upload", key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
     // let body = fs.readFileSync(name);
     let body = fs.createReadStream(name).pipe(zlib.createGzip());
@@ -136,12 +136,16 @@ app.all("/upload", async (req, res) => {
   try {
     res.json({ data: "uploading" });
     let uploads = [];
-    read("converted", "./server-middleware",uploads);
-    console.log('uploading');
+    read("converted", "./server-middleware", uploads);
+    console.log("uploading");
     // fs.writeFileSync("./content/imports/imports.json",JSON.stringify(imports));
   } catch (err) {
     console.log(err);
   }
+});
+
+app.all("/files", (req, res) => {
+  console.log(req);
 });
 
 module.exports = app;

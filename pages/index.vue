@@ -1,5 +1,15 @@
 <template>
   <div id="root">
+    <label
+      >File
+      <input
+        type="file"
+        id="file"
+        ref="file"
+        v-on:change="handleFilesUpload()"
+      />
+    </label>
+    <button v-on:click="submitFile()">Submit</button>
     <button @click="this.getSlides">Convert Slides</button>
     <button @click="uploadSlides">Upload Slides</button>
     <h2 class="text-center text-xl">Convert</h2>
@@ -14,7 +24,9 @@
       <tbody>
         <tr v-for="log in logs">
           <td>{{ log.data.Key }}</td>
-          <td v-if="log.data.err" class="text-red">Error: {{ log.data.err }}</td>
+          <td v-if="log.data.err" class="text-red">
+            Error: {{ log.data.err }}
+          </td>
           <td class="text-green" v-else>Success: {{ log.data.Location }}</td>
           <td>{{ log.date }}</td>
         </tr>
@@ -74,18 +86,34 @@ const s3 = new AWS.S3({
 
 export default {
   async asyncData(context) {
-    let logs = await context.$content('imports').fetch();
+    let logs = await context.$content("imports").fetch();
     return {
-      logs
-    } 
+      logs,
+    };
   },
   methods: {
+    handleFilesUpload() {
+      this.files = this.$refs.files.files;
+    },
+    async submitFiles() {
+      let formData = new FormData();
+      for (var i = 0; i < this.files.length; i++) {
+        let file = this.files[i];
+
+        formData.append("files[" + i + "]", file);
+      }
+      await $this.axios.post("/server-middleware/files", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    },
     callUploads() {
       this.status = "uploading";
     },
     async uploadSlides() {
       let uploadResult = await this.$axios("/server-middleware/upload");
-      console.log('result!!');
+      console.log("result!!");
       console.log(uploadResult);
     },
     ...mapActions(["uploadCheck", "getSlides", "convert", "upload"]),
