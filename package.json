@@ -21,6 +21,7 @@
     "datatables": "^1.10.18",
     "express": "^4.17.1",
     "fs-extra": "^9.1.0",
+    "graceful-fs": "^4.2.6",
     "node-sass": "^6.0.0",
     "nuxt": "^2.15.7",
     "open": "^8.0.9",

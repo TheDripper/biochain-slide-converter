@@ -2,7 +2,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 const sharp = require("sharp");
-const fs = require("fs-extra");
+const fs = require("graceful-fs");
 const path = require("path");
 const rimraf = require("rimraf");
 const util = require("util");
@@ -22,14 +22,11 @@ async function convertDzi(slides) {
   }
   fs.mkdirSync(path.join(__dirname, "converted"), 0o777);
   for (let obj of slides) {
-    console.log("slides",slides);
     let filename = obj.Key.slice(0, -4);
-    console.log("filename",filename);
     if (fs.existsSync("converted/" + filename)) {
       fs.rmdirSync("converted/" + filename);
     }
     fs.mkdirSync(path.join(__dirname, "converted", filename), 0o777);
-    console.log("mkdir");
     await sharp("./upload-svs/" + obj.Key, {
       limitInputPixels: false
     })
@@ -38,11 +35,9 @@ async function convertDzi(slides) {
         size: 512
       })
       .toFile(path.join(__dirname, "converted", filename, filename + ".dz"));
-    console.log("after sharp");
   }
 }
 const convertSync = util.promisify(convertDzi);
-//const uploadSync = util.promisify(uploadDir);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -52,7 +47,6 @@ app.all("/slides", async (req, res) => {
   };
   try {
     let uploads = await s3.listObjects(params).promise();
-    console.log(uploads);
     res.json({ data: uploads });
   } catch (err) {
     console.log(err);
@@ -69,8 +63,6 @@ app.post("/download", async (req, res) => {
       let slide = await s3.getObject(fileParams).promise();
       fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
       writes.push(upload.Key);
-      console.log("loop done");
-      console.log(writes);
     } catch (err) {
       console.log(err);
     }
@@ -79,7 +71,6 @@ app.post("/download", async (req, res) => {
 });
 app.post("/convert", async (req, res) => {
   try {
-    console.log('convert rest');
     convertDzi(req.body.slides);
     res.json({ data: "converting..." });
   } catch (err) {
@@ -87,32 +78,27 @@ app.post("/convert", async (req, res) => {
   }
 });
 app.all("/upload", async (req, res) => {
+  const uploadSync = util.promisify(upload);
   const readSync = util.promisify(read);
+  let thread = [];
   async function read(dir, dirPath, uploads) {
-    console.log("calling read: " + dir + ", " + dirPath);
-    // console.log("read:" + dir);
-    // console.log("dirPath: " + dirPath);
     let target = path.resolve(dirPath, dir);
     let names = fs.readdirSync(target);
-    // console.log("target:" + target);
-    // console.log("names:" + names);
     for (let file of names) {
-      //console.log("file: "+file);
-      //console.log("target: "+target);
-      //console.log("dirPath: "+dirPath);
       let name = path.resolve(target, file);
       let key = name.split("server-middleware/")[1];
-      //console.log("name: "+name);
       let stat = fs.statSync(name);
       if (stat.isFile()) {
-        let uploadResult = await upload(name, key, uploads);
+        upload(name, key, uploads);
       } else {
         read(name, target, uploads);
       }
     }
+    console.log('return uploads');
     return uploads;
   }
-  function upload(name, key) {
+  async function upload(name, key, uploads) {
+    console.log('Upload',key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
     // let body = fs.readFileSync(name);
     let body = fs.createReadStream(name).pipe(zlib.createGzip());
@@ -139,9 +125,10 @@ app.all("/upload", async (req, res) => {
         if (path.extname(key) == ".dzi") {
           let logname = path.basename(key).slice(0, -4);
           fs.writeFileSync(
-            "./content/" + logname + ".json",
+            "./content/imports/" + logname + ".json",
             JSON.stringify(uploadResult)
           );
+          uploads.push(uploadResult);
         }
         return uploads;
       });
@@ -149,8 +136,9 @@ app.all("/upload", async (req, res) => {
   try {
     res.json({ data: "uploading" });
     let uploads = [];
-    let imports = await readSync("converted", "./server-middleware",uploads);
-    fs.writeFileSync("./content/imports.json",JSON.stringify(imports));
+    read("converted", "./server-middleware",uploads);
+    console.log('uploading');
+    // fs.writeFileSync("./content/imports/imports.json",JSON.stringify(imports));
   } catch (err) {
     console.log(err);
   }

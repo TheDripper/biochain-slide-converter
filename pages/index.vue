@@ -13,8 +13,8 @@
       </thead>
       <tbody>
         <tr v-for="log in logs">
-          <td>{{ log.key }}</td>
-          <td v-if="log.err" class="text-red">Error: {{ log.err }}</td>
+          <td>{{ log.data.Key }}</td>
+          <td v-if="log.data.err" class="text-red">Error: {{ log.data.err }}</td>
           <td class="text-green" v-else>Success: {{ log.data.Location }}</td>
           <td>{{ log.date }}</td>
         </tr>
@@ -73,9 +73,10 @@ const s3 = new AWS.S3({
 });
 
 export default {
-  asyncData(context) {
-    console.log(context.$content);
+  async asyncData(context) {
+    let logs = await context.$content('imports').fetch();
     return {
+      logs
     } 
   },
   methods: {
@@ -116,9 +117,6 @@ export default {
     date() {
       return this.$store.state.date;
     },
-    logs() {
-      return this.$store.state.logs;
-    }
   },
 };
 </script>

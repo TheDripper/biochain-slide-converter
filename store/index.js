@@ -38,16 +38,13 @@ export const actions = {
       uploads
     });
     commit("uploads", uploads);
-    console.log('convert store');
     this.$axios.post("/server-middleware/convert", {
       slides: uploads
     });
-    // console.log("axios post");
     // this.$axios("/server-middleware/upload");
   },
   async uploadCheck({ commit }) {
     let { data } = await this.$axios("/server-middleware/getJSON");
-    console.log("uploads done! store");
     commit("audit", data);
   },
   async convert({ commit, store }) {
