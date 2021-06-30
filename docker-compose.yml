@@ -5,13 +5,12 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-    deploy: 
-      resources:
-        limits:
-          memory: 4GB
-    image: bc_converter
-    command: sh -c "npm install --loglevel verbose && npm run dev"
+    image: biochain 
+    command: sh -c "npm start --loglevel verbose"
     ports:
       - 3000:3000
     volumes:
       - "./:/home"
+      - "./content:/home/content"
+      - "./content/imports:/home/content/imports"
+      - "./upload-svs:/home/upload-svs"

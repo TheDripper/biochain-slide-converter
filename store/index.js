@@ -34,6 +34,7 @@ export const actions = {
   async getSlides({ commit, store }) {
     let { data } = await this.$axios("/server-middleware/slides");
     let uploads = data.data.Contents;
+    console.log('uploads',uploads);
     let written = await this.$axios.post("/server-middleware/download", {
       uploads
     });

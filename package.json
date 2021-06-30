@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nuxt",
     "build": "nuxt build",
-    "start": "nuxt start",
+    "start": "nuxt start --max-old-space-size=8192",
     "generate": "nuxt generate",
     "postinstall": "npm run build"
   },

@@ -54,13 +54,16 @@ app.all("/slides", async (req, res) => {
 });
 app.post("/download", async (req, res) => {
   let writes = [];
+  console.log('download',req.body);
   for (let upload of req.body.uploads) {
     let fileParams = {
       Bucket: "biochain-slide-uploads",
       Key: upload.Key
     };
     try {
+      console.log('file params',fileParams);
       let slide = await s3.getObject(fileParams).promise();
+      console.log('slide done',slide);
       fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
       writes.push(upload.Key);
     } catch (err) {
