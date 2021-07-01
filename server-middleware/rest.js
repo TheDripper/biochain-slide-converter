@@ -9,6 +9,8 @@ const util = require("util");
 const csv = require("csvtojson");
 const AWS = require("aws-sdk");
 const zlib = require("zlib");
+const multer = require("multer");
+const upload = multer({dest: './server-middleware/uploads/'})
 
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KQIFS6VRG",
@@ -147,8 +149,10 @@ app.all("/upload", async (req, res) => {
   }
 });
 
-app.all("/files", (req, res) => {
-  console.log(req);
-});
+app.post("/files", upload.array('files'), function(req, res, next) {
+  console.log('files!');
+  console.log(req.files, req.file)
+  res.json({data:"files done"});
+}); 
 
 module.exports = app;

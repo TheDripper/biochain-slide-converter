@@ -1,18 +1,32 @@
 <template>
-  <div id="root">
+  <div id="root" class="p-4">
     <label
       >File
       <input
         type="file"
-        id="file"
-        ref="file"
+        multiple
+        id="files"
+        ref="files"
+        name="files"
         v-on:change="handleFilesUpload()"
       />
     </label>
-    <button v-on:click="submitFile()">Submit</button>
-    <button @click="this.getSlides">Convert Slides</button>
-    <button @click="uploadSlides">Upload Slides</button>
-    <h2 class="text-center text-xl">Convert</h2>
+    <h2>Import .svs</h2>
+    <button v-on:click="submitFiles()">Import .svs files to converter</button>
+    <table id="new-slides" class="w-full p-8">
+      <thead>
+        <tr>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="upload in uploads">
+          <td>{{ upload }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 class="text-2xl mt-24">Convert</h2>
+    <button @click="this.getSlides">Convert .svs to .dzi</button>
     <table id="logs" class="w-full p-8" v-if="logs.length">
       <thead>
         <tr>
@@ -23,7 +37,7 @@
       </thead>
       <tbody>
         <tr v-for="log in logs">
-          <td>{{ log.data.Key }}</td>
+          <td>{{ log.name }}</td>
           <td v-if="log.data.err" class="text-red">
             Error: {{ log.data.err }}
           </td>
@@ -32,21 +46,22 @@
         </tr>
       </tbody>
     </table>
-    <table id="errors" class="w-full p-8">
+    <h2 class="text-2xl mt-24">Upload to Biochain</h2>
+    <button @click="uploadSlides">Upload .dzi files to Biochain</button>
+    <table id="uploads" class="w-full p-8">
       <thead>
         <tr>
           <th>Slide</th>
-          <th>Upload Error</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="upload in uploads">
           <td>{{ upload }}</td>
-          <td>{{ upload }}</td>
         </tr>
       </tbody>
     </table>
-    <h2 class="text-xl text-center my-8">{{ date.date }}</h2>
+    <h2 class="text-2xl my-8">Slide Audit</h2>
+    <h2 class="text-2xl my-8">{{ date.date }}</h2>
     <table id="slides" class="w-full p-8">
       <thead>
         <tr>
@@ -78,6 +93,7 @@ import $ from "jquery";
 import "datatables";
 import { mapActions } from "vuex";
 const AWS = require("aws-sdk");
+const path = require("path");
 
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KQIFS6VRG",
@@ -87,22 +103,37 @@ const s3 = new AWS.S3({
 export default {
   async asyncData(context) {
     let logs = await context.$content("imports").fetch();
+    if (logs.length) {
+      for (let log of logs) {
+        log.name = path.basename(log.key);
+      }
+    }
     return {
       logs,
     };
   },
   methods: {
     handleFilesUpload() {
-      this.files = this.$refs.files.files;
+      let ary = [];
+      let files = this.$refs.files.files;
+      console.log(files.length);
+      for (let i=0; i<files.length; i++) {
+        console.log(files[i]);
+        ary.push(files[i]);
+      }
+      // for (let i in files) {
+      //   console.log(files.item(i));
+      // }
+      this.files = ary;
     },
     async submitFiles() {
       let formData = new FormData();
       for (var i = 0; i < this.files.length; i++) {
         let file = this.files[i];
-
         formData.append("files[" + i + "]", file);
       }
-      await $this.axios.post("/server-middleware/files", formData, {
+      console.log("submit", formData);
+      await this.$axios.post("/server-middleware/files", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -132,6 +163,7 @@ export default {
     return {
       json: {},
       status: "Ready to upload slides",
+      files: [],
     };
   },
   // async fetch() {},
