@@ -7,7 +7,7 @@
         multiple
         id="files"
         ref="files"
-        name="files"
+        name="files[]"
         v-on:change="handleFilesUpload()"
       />
     </label>
@@ -114,26 +114,27 @@ export default {
   },
   methods: {
     handleFilesUpload() {
-      let ary = [];
-      let files = this.$refs.files.files;
-      console.log(files.length);
-      for (let i=0; i<files.length; i++) {
-        console.log(files[i]);
-        ary.push(files[i]);
-      }
+      // let ary = [];
+      this.files = this.$refs.files.files;
+      // console.log(files.length);
+      // for (let i=0; i<files.length; i++) {
+      //   console.log(files[i]);
+      //   ary.push(files[i]);
+      // }
       // for (let i in files) {
       //   console.log(files.item(i));
       // }
-      this.files = ary;
+      // this.files = ary;
     },
     async submitFiles() {
-      let formData = new FormData();
-      for (var i = 0; i < this.files.length; i++) {
-        let file = this.files[i];
-        formData.append("files[" + i + "]", file);
+      let formdata = new FormData();
+      let files = this.files
+      console.log("files", files);
+      formdata.append("files", files);
+      for (let field of formdata.values()) {
+        console.log(field);
       }
-      console.log("submit", formData);
-      await this.$axios.post("/server-middleware/files", formData, {
+      await this.$axios.post("/server-middleware/files", formdata, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -163,7 +164,7 @@ export default {
     return {
       json: {},
       status: "Ready to upload slides",
-      files: [],
+      files: "",
     };
   },
   // async fetch() {},
