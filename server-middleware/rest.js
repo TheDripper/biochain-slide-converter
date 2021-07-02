@@ -152,7 +152,7 @@ app.all("/upload", async (req, res) => {
 app.post("/files", upload.array('files'), function(req, res, next) {
   console.log('files!');
   console.log(req.body.files);
-  res.json({data:"files done"});
+  res.json({files:req.body.files});
 }); 
 
 module.exports = app;

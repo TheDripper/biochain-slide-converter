@@ -134,11 +134,7 @@ export default {
       for (let field of formdata.values()) {
         console.log(field);
       }
-      await this.$axios.post("/server-middleware/files", formdata, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await this.$axios.post("/server-middleware/files", formdata);
     },
     callUploads() {
       this.status = "uploading";
