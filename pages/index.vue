@@ -1,31 +1,6 @@
 <template>
   <div id="root" class="p-4">
-    <label
-      >File
-      <input
-        type="file"
-        multiple
-        id="files"
-        ref="files"
-        name="files[]"
-        v-on:change="handleFilesUpload()"
-      />
-    </label>
-    <h2>Import .svs</h2>
-    <button v-on:click="submitFiles()">Import .svs files to converter</button>
-    <table id="new-slides" class="w-full p-8">
-      <thead>
-        <tr>
-          <th>File</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="upload in uploads">
-          <td>{{ upload }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <h2 class="text-2xl mt-24">Convert</h2>
+    <h2 class="text-2xl mt-12">Convert</h2>
     <button @click="this.getSlides">Convert .svs to .dzi</button>
     <table id="logs" class="w-full p-8" v-if="logs.length">
       <thead>
@@ -113,29 +88,6 @@ export default {
     };
   },
   methods: {
-    handleFilesUpload() {
-      // let ary = [];
-      this.files = this.$refs.files.files;
-      // console.log(files.length);
-      // for (let i=0; i<files.length; i++) {
-      //   console.log(files[i]);
-      //   ary.push(files[i]);
-      // }
-      // for (let i in files) {
-      //   console.log(files.item(i));
-      // }
-      // this.files = ary;
-    },
-    async submitFiles() {
-      let formdata = new FormData();
-      let files = this.files
-      console.log("files", files);
-      formdata.append("files", files);
-      for (let field of formdata.values()) {
-        console.log(field);
-      }
-      await this.$axios.post("/server-middleware/files", formdata);
-    },
     callUploads() {
       this.status = "uploading";
     },
@@ -160,11 +112,14 @@ export default {
     return {
       json: {},
       status: "Ready to upload slides",
-      files: "",
+      // files:  []
     };
   },
   // async fetch() {},
   computed: {
+    files() {
+      return this.$refs.files.files;
+    },
     slides() {
       return this.$store.state.slides;
     },

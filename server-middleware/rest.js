@@ -10,7 +10,23 @@ const csv = require("csvtojson");
 const AWS = require("aws-sdk");
 const zlib = require("zlib");
 const multer = require("multer");
-const upload = multer({dest: './server-middleware/uploads/'})
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './server-middleware/uploads')
+  },
+  filename: function(req, file, cb) {
+    console.log(file.mimetype);
+    eb(null, file.fieldname + "-" + Date.now());
+  }
+});
+
+var upload = multer({
+  storage: storage
+});
+
+//server.js
+
+// SET STORAGE
 
 const s3 = new AWS.S3({
   accessKeyId: "AKIA4EV32R5KQIFS6VRG",
@@ -25,6 +41,7 @@ async function convertDzi(slides) {
   fs.mkdirSync(path.join(__dirname, "converted"), 0o777);
   for (let obj of slides) {
     let filename = obj.Key.slice(0, -4);
+    console.log(filename);
     if (fs.existsSync("converted/" + filename)) {
       fs.rmdirSync("converted/" + filename);
     }
@@ -38,6 +55,7 @@ async function convertDzi(slides) {
       })
       .toFile(path.join(__dirname, "converted", filename, filename + ".dz"));
   }
+  console.log('convert done');
 }
 const convertSync = util.promisify(convertDzi);
 
@@ -56,16 +74,16 @@ app.all("/slides", async (req, res) => {
 });
 app.post("/download", async (req, res) => {
   let writes = [];
-  console.log('download',req.body);
+  console.log("download", req.body);
   for (let upload of req.body.uploads) {
     let fileParams = {
       Bucket: "biochain-slide-uploads",
       Key: upload.Key
     };
     try {
-      console.log('file params',fileParams);
+      console.log("file params", fileParams);
       let slide = await s3.getObject(fileParams).promise();
-      console.log('slide done',slide);
+      console.log("slide done", slide);
       fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
       writes.push(upload.Key);
     } catch (err) {
@@ -76,6 +94,7 @@ app.post("/download", async (req, res) => {
 });
 app.post("/convert", async (req, res) => {
   try {
+    console.log('convert',req.body.slides);
     convertDzi(req.body.slides);
     res.json({ data: "converting..." });
   } catch (err) {
@@ -149,10 +168,12 @@ app.all("/upload", async (req, res) => {
   }
 });
 
-app.post("/files", upload.array('files'), function(req, res, next) {
-  console.log('files!');
-  console.log(req.body.files);
-  res.json({files:req.body.files});
-}); 
+app.post("/files", upload.array("files"), function(req, res, err) {
+  if(err) {
+    console.log(err);
+  }
+  console.log("files!");
+  res.json({ files: req.body.files });
+});
 
 module.exports = app;
