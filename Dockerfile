@@ -1,3 +1,3 @@
-FROM mhart/alpine-node:14
+FROM ubuntu:18.04
 WORKDIR ./home
 EXPOSE 3000
