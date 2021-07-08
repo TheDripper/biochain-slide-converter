@@ -1,2 +1,4 @@
 #!/bin/bash
-npm run dev
+# npm install --loglevel verbose
+# npm run build
+npm start --loglevel verbose

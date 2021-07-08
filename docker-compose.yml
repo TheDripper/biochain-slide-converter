@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       context: .
     image: biochain 
-    command: sh -c "npm start --loglevel verbose"
+    command: sh -c "sh ./run.sh"
     ports:
       - 3000:3000
     volumes:
@@ -15,4 +15,3 @@ services:
       - "./content/imports:/home/content/imports"
       - "./upload-svs:/home/upload-svs"
       - "./server-middleware/uploads:/home/server-middleware/uploads"
-      # YOU NEED TO BUILD THE IMAGE FOR THE NEW VOLUME
