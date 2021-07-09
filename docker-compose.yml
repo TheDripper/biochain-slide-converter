@@ -15,3 +15,4 @@ services:
       - "./content/imports:/home/content/imports"
       - "./upload-svs:/home/upload-svs"
       - "./server-middleware/uploads:/home/server-middleware/uploads"
+      - "./run.sh:/home/run.sh"
