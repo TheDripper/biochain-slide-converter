@@ -2,7 +2,7 @@ const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 const sharp = require("sharp");
-const fs = require("graceful-fs");
+const fs = require("fs");
 const path = require("path");
 const rimraf = require("rimraf");
 const util = require("util");
@@ -107,7 +107,7 @@ app.all("/upload", async (req, res) => {
   let thread = [];
   async function read(dir, dirPath, uploads) {
     let target = path.resolve(dirPath, dir);
-    let names = fs.readdirSync(target);
+    let names = fs.readdir(target);
     for (let file of names) {
       let name = path.resolve(target, file);
       let key = name.split("server-middleware/")[1];
@@ -125,6 +125,7 @@ app.all("/upload", async (req, res) => {
     console.log("Upload", key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
     // let body = fs.readFileSync(name);
+    try {
     let body = fs.createReadStream(name).pipe(zlib.createGzip());
     s3.upload({
       Bucket: "biochain-dev",
@@ -156,6 +157,9 @@ app.all("/upload", async (req, res) => {
         }
         return uploads;
       });
+    } catch(err) {
+      console.log(err);
+    }
   }
   try {
     res.json({ data: "uploading" });
