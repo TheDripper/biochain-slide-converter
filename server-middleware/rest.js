@@ -105,7 +105,7 @@ app.all("/upload", async (req, res) => {
   const uploadSync = util.promisify(upload);
   const readSync = util.promisify(read);
   let thread = [];
-  async function read(dir, dirPath, uploads) {
+  async function readdirSync(dir, dirPath, uploads) {
     let target = path.resolve(dirPath, dir);
     let names = fs.readdir(target);
     for (let file of names) {
