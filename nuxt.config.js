@@ -50,13 +50,14 @@ export default {
     // '/wp-json': 'https://79d801e6b0b6.ngrok.io'
     "/s3": {
       target: "https://biochain.s3-us-west-1.amazonaws.com/",
+      pathRewrite: {'/server-middleware/':''},
       changeOrigin: true
     }
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  //axios: {
-  //  baseURL: "http://localhost:3000"
-  //},
+  axios: {
+    proxy: true
+  },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
