@@ -12,9 +12,9 @@ export default {
     ],
     link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }]
   },
-   server: {
-     host: "0.0.0.0"
-   },
+  server: {
+    host: "0.0.0.0"
+  },
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
 
@@ -25,9 +25,9 @@ export default {
     //   mode: "server"
     // }
   ],
-   serverMiddleware: [
-     { path: "/server-middleware", handler: "~/server-middleware/rest.js" },
-   ],
+  serverMiddleware: [
+    { path: "/server-middleware", handler: "~/server-middleware/rest.js" }
+  ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -48,7 +48,10 @@ export default {
   ],
   proxy: {
     // '/wp-json': 'https://79d801e6b0b6.ngrok.io'
-    "/s3": "https://biochain.s3-us-west-1.amazonaws.com/",
+    "/s3": {
+      target: "https://biochain.s3-us-west-1.amazonaws.com/",
+      changeOrigin: true
+    }
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   //axios: {
