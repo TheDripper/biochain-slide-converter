@@ -3,6 +3,9 @@ const express = require("express");
 const app = express();
 const sharp = require("sharp");
 const fs = require("graceful-fs");
+var realFs = require('fs')
+var gracefulFs = require('graceful-fs')
+gracefulFs.gracefulify(realFs)
 const path = require("path");
 const rimraf = require("rimraf");
 const util = require("util");
@@ -35,17 +38,18 @@ const s3 = new AWS.S3({
 
 async function convertDzi(slides) {
   let audit = [];
-  if (fs.existsSync(path.join(__dirname, "converted"))) {
-    fs.rmdirSync(path.join(__dirname, "converted"), { recursive: true });
+  console.log('SUCH GRACE');
+  if (gracefulFs.existsSync(path.join(__dirname, "converted"))) {
+    gracefulFs.rmdirSync(path.join(__dirname, "converted"), { recursive: true });
   }
-  fs.mkdirSync(path.join(__dirname, "converted"), 0o777);
+  gracefulFs.mkdirSync(path.join(__dirname, "converted"), 0o777);
   for (let obj of slides) {
     let filename = obj.Key.slice(0, -4);
     console.log(filename);
-    if (fs.existsSync("converted/" + filename)) {
-      fs.rmdirSync("converted/" + filename);
+    if (gracefulFs.existsSync("converted/" + filename)) {
+      gracefulFs.rmdirSync("converted/" + filename);
     }
-    fs.mkdirSync(path.join(__dirname, "converted", filename), 0o777);
+    gracefulFs.mkdirSync(path.join(__dirname, "converted", filename), 0o777);
     await sharp("./upload-svs/" + obj.Key, {
       limitInputPixels: false
     })
@@ -84,7 +88,7 @@ app.post("/download", async (req, res) => {
       console.log("file params", fileParams);
       let slide = await s3.getObject(fileParams).promise();
       console.log("slide done", slide);
-      fs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
+      gracefulFs.writeFileSync("upload-svs/" + upload.Key, slide.Body);
       writes.push(upload.Key);
     } catch (err) {
       console.log(err);
@@ -107,11 +111,11 @@ app.all("/upload", async (req, res) => {
   let thread = [];
   async function read(dir, dirPath, uploads) {
     let target = path.resolve(dirPath, dir);
-    let names = fs.readdirSync(target);
+    let names = gracefulFs.readdirSync(target);
     for (let file of names) {
       let name = path.resolve(target, file);
       let key = name.split("server-middleware/")[1];
-      let stat = fs.statSync(name);
+      let stat = gracefulFs.statSync(name);
       if (stat.isFile()) {
         upload(name, key, uploads);
       } else {
@@ -124,9 +128,9 @@ app.all("/upload", async (req, res) => {
   async function upload(name, key, uploads) {
     console.log("Upload", key);
     // let bucketPath = "converted/" + name.substring(name.length + 1).replace(/\\/g, "/");
-    // let body = fs.readFileSync(name);
+    // let body = gracefulFs.readFileSync(name);
     try {
-    let body = fs.createReadStream(name).pipe(zlib.createGzip());
+    let body = gracefulFs.createReadStream(name).pipe(zlib.createGzip());
     s3.upload({
       Bucket: "biochain-dev",
       Body: body,
@@ -149,7 +153,7 @@ app.all("/upload", async (req, res) => {
         };
         if (path.extname(key) == ".dzi") {
           let logname = path.basename(key).slice(0, -4);
-          fs.writeFileSync(
+          gracefulFs.writeFileSync(
             "./content/imports/" + logname + ".json",
             JSON.stringify(uploadResult)
           );
@@ -166,7 +170,7 @@ app.all("/upload", async (req, res) => {
     let uploads = [];
     read("converted", "./server-middleware", uploads);
     console.log("uploading");
-    // fs.writeFileSync("./content/imports/imports.json",JSON.stringify(imports));
+    // gracefulFs.writeFileSync("./content/imports/imports.json",JSON.stringify(imports));
   } catch (err) {
     console.log(err);
   }
