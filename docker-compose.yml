@@ -6,6 +6,10 @@ services:
       dockerfile: Dockerfile
       context: .
     image: biochain 
+    ulimits:
+      nofile:
+        soft: 98304
+        hard: 98304
     command: sh -c "sh ./run.sh"
     ports:
       - 3000:3000
