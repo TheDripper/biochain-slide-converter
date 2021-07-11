@@ -105,9 +105,9 @@ app.all("/upload", async (req, res) => {
   const uploadSync = util.promisify(upload);
   const readSync = util.promisify(read);
   let thread = [];
-  async function readdirSync(dir, dirPath, uploads) {
+  async function read(dir, dirPath, uploads) {
     let target = path.resolve(dirPath, dir);
-    let names = fs.readdir(target);
+    let names = fs.readdirSync(target);
     for (let file of names) {
       let name = path.resolve(target, file);
       let key = name.split("server-middleware/")[1];
