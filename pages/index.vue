@@ -2,6 +2,8 @@
   <div id="root" class="p-4">
     <h2 class="text-2xl mt-12">Convert</h2>
     <button @click="this.getSlides">Convert .svs to .dzi</button>
+    <h2 class="text-2xl mt-12">Converted Slides: Ready to Upload</h2>
+    <button @click="uploadSlides">Upload .dzi files to Biochain</button>
     <table id="converted" class="w-full p-8" v-if="converted.length">
       <thead>
         <tr>
@@ -16,6 +18,7 @@
         </tr>
       </tbody>
     </table>
+    <h2 class="text-2xl mt-12">Uploaded Slides</h2>
     <table id="logs" class="w-full p-8" v-if="logs.length">
       <thead>
         <tr>
@@ -35,21 +38,7 @@
         </tr>
       </tbody>
     </table>
-    <h2 class="text-2xl mt-24">Upload to Biochain</h2>
-    <button @click="uploadSlides">Upload .dzi files to Biochain</button>
-    <table id="uploads" class="w-full p-8">
-      <thead>
-        <tr>
-          <th>Slide</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="upload in uploads">
-          <td>{{ upload }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <h2 class="text-2xl my-8">Slide Audit</h2>
+    <h2 class="text-2xl mt-12">Slide Audit CSV</h2>
     <h2 class="text-2xl my-8">{{ date.date }}</h2>
     <table id="slides" class="w-full p-8">
       <thead>
@@ -148,7 +137,7 @@ export default {
   },
 };
 </script>
-<style>
+<style lang="scss">
 button {
   width: 100px;
   height: 50px;
@@ -179,5 +168,8 @@ a {
 }
 button {
   font-size: 12px;
+}
+table {
+  border: 1px solid black;
 }
 </style>
