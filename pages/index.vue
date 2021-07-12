@@ -2,6 +2,20 @@
   <div id="root" class="p-4">
     <h2 class="text-2xl mt-12">Convert</h2>
     <button @click="this.getSlides">Convert .svs to .dzi</button>
+    <table id="converted" class="w-full p-8" v-if="converted.length">
+      <thead>
+        <tr>
+          <th>Slide</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="convert in converted">
+          <td>{{ convert.filename }}</td>
+          <td>{{ convert.updatedAt }}</td>
+        </tr>
+      </tbody>
+    </table>
     <table id="logs" class="w-full p-8" v-if="logs.length">
       <thead>
         <tr>
@@ -78,6 +92,7 @@ const s3 = new AWS.S3({
 export default {
   async asyncData(context) {
     let logs = await context.$content("imports").fetch();
+    let converted = await context.$content("converted").fetch();
     if (logs.length) {
       for (let log of logs) {
         log.name = path.basename(log.key);
@@ -85,6 +100,7 @@ export default {
     }
     return {
       logs,
+      converted,
     };
   },
   methods: {
