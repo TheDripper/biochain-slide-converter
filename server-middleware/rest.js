@@ -143,7 +143,7 @@ app.all("/upload", async (req, res) => {
     try {
       let body = gracefulFs.createReadStream(name).pipe(zlib.createGzip());
       s3.upload({
-        Bucket: "biochain-dev",
+        Bucket: "biochain",
         Body: body,
         Key: key
       })
