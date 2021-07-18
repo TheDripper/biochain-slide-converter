@@ -4,6 +4,18 @@
     <button @click="this.getSlides">Convert .svs to .dzi</button>
     <h2 class="text-2xl mt-12">Converted Slides: Ready to Upload</h2>
     <button @click="uploadSlides">Upload .dzi files to Biochain</button>
+    <table id="queued" class="w-full p-8" v-if="queued.length">
+      <thead>
+        <tr>
+          <th>Slide</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="queue in queued">
+          <td>{{ queue.Key }}</td>
+        </tr>
+      </tbody>
+    </table>
     <table id="converted" class="w-full p-8" v-if="converted.length">
       <thead>
         <tr>
@@ -122,6 +134,9 @@ export default {
   },
   // async fetch() {},
   computed: {
+    queued() {
+      return this.$store.state.queued.data.Contents;
+    },
     files() {
       return this.$refs.files.files;
     },

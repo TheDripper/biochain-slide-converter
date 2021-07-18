@@ -5,7 +5,9 @@ import logs from "~/imports.json";
 
 export const state = () => ({
   slides: [],
+  queued: [],
   uploads: [],
+  converted: [],
   converted: [],
   date: ""
 });
@@ -16,6 +18,9 @@ export const mutations = {
   },
   slides(state, slides) {
     state.slides = slides;
+  },
+  queued(state, queued) {
+    state.queued = queued;
   },
   uploads(state, uploads) {
     state.uploads = uploads;
@@ -59,6 +64,12 @@ export const actions = {
   async nuxtServerInit({ commit }) {
     //this.converter();
     let date = live.pop();
+    let { data } = await this.$axios("/server-middleware/slides");
+    commit("queued",data);
+    // let converted = await $content("converted").fetch();
+    // let uploads = await $content("imports").fetch();
+    // commit("converted",converted);
+    // commit("uploads",uploads);
     commit("date", date);
     commit("slides", live);
     commit("logs",logs);
