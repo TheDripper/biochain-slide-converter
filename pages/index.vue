@@ -1,9 +1,6 @@
 <template>
   <div id="root" class="p-4">
-    <h2 class="text-2xl mt-12">Convert</h2>
-    <button @click="this.getSlides">Convert .svs to .dzi</button>
-    <h2 class="text-2xl mt-12">Converted Slides: Ready to Upload</h2>
-    <button @click="uploadSlides">Upload .dzi files to Biochain</button>
+    <h2 class="text-2xl mt-12">.svs Slides Ready to Convert</h2>
     <table id="queued" class="w-full p-8" v-if="queued.length">
       <thead>
         <tr>
@@ -16,6 +13,10 @@
         </tr>
       </tbody>
     </table>
+    <h2 class="text-2xl mt-12">Convert</h2>
+    <button @click="this.getSlides">Convert .svs to .dzi</button>
+    <h2 class="text-2xl mt-12">Converted Slides: Ready to Upload</h2>
+    <button @click="uploadSlides">Upload .dzi files to Biochain</button>
     <table id="converted" class="w-full p-8" v-if="converted.length">
       <thead>
         <tr>
@@ -135,7 +136,12 @@ export default {
   // async fetch() {},
   computed: {
     queued() {
-      return this.$store.state.queued.data.Contents;
+      let slides = [];
+      for(let slide of this.$store.state.queued.data.Contents) {
+        slide.status="ready";
+        slides.push(slide);
+      }
+      return slides;
     },
     files() {
       return this.$refs.files.files;
