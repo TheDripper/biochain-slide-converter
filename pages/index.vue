@@ -1,6 +1,37 @@
 <template>
   <div id="root" class="p-4">
-    <h2 class="text-2xl mt-12">Failed Uploads: {{errors.length}}</h2>
+    <ul id="top" class="flex text-xl w-full justify-between">
+      <li><a href="#errors">Errors</a></li>
+      <li><a href="#queued">Convert</a></li>
+      <li><a href="#converted">Upload</a></li>
+    </ul>
+    <div id="backtotop" class="sticky top-0 left-0"><a href="#top">Back to top</a></div>
+    <table v-if="slides.length" id="slides" class="w-full p-8">
+      <thead>
+        <tr>
+          <th>Slide</th>
+          <th>Status</th>
+          <th>Uploaded on</th>
+          <th>Slide Link</th>
+          <th>Product Page</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="check in slides">
+          <td>{{ check.slide }}</td>
+          <td v-if="check.error">Error</td>
+          <td v-else>Success</td>
+          <td>{{ check.date }}</td>
+          <td>
+            <a target="_blank" :href="check.url">View Slide on biochain.com</a>
+          </td>
+          <td>
+            <a target="_blank" :href="check.product">{{ check.name }}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h2 class="text-2xl mt-12">Failed Uploads: {{ errors.length }}</h2>
     <table id="errors" class="w-full p-8" v-if="errors.length">
       <thead>
         <tr>
@@ -13,8 +44,11 @@
         </tr>
       </tbody>
     </table>
-    <h2 class="text-2xl mt-12">Uploaded .svs to Convert: {{queued.length}}</h2>
-    <table id="queued" class="w-full p-8" v-if="queued.length">
+    <h2 id="queued" class="text-2xl mt-12">
+      Uploaded .svs to Convert: {{ queued.length }}
+    </h2>
+    <button @click="this.getSlides">Convert .svs to .dzi</button>
+    <table class="w-full p-8" v-if="queued.length">
       <thead>
         <tr>
           <th>Slide</th>
@@ -26,11 +60,9 @@
         </tr>
       </tbody>
     </table>
-    <h2 class="text-2xl mt-12">Convert</h2>
-    <button @click="this.getSlides">Convert .svs to .dzi</button>
-    <h2 class="text-2xl mt-12">Converted Slides: Ready to Upload</h2>
+    <h2 class="text-2xl mt-12" id="converted">Converted Slides: Ready to Upload: {{ converted.length }}</h2>
     <button @click="uploadSlides">Upload .dzi files to Biochain</button>
-    <table id="converted" class="w-full p-8" v-if="converted.length">
+    <table class="w-full p-8" v-if="converted.length">
       <thead>
         <tr>
           <th>Slide</th>
@@ -61,32 +93,6 @@
           </td>
           <td class="text-green" v-else>Success: {{ log.data.Location }}</td>
           <td>{{ log.date }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <h2 class="text-2xl mt-12">Slide Audit CSV</h2>
-    <h2 class="text-2xl my-8">{{ date.date }}</h2>
-    <table id="slides" class="w-full p-8">
-      <thead>
-        <tr>
-          <th>Slide</th>
-          <th>Status</th>
-          <th>Uploaded on</th>
-          <th>Slide Link</th>
-          <th>Product Page</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="check in slides">
-          <td>{{ check.slide }}</td>
-          <td>{{ check.status }}</td>
-          <td>{{ check.date }}</td>
-          <td>
-            <a target="_blank" :href="check.url">View Slide on biochain.com</a>
-          </td>
-          <td>
-            <a target="_blank" :href="check.product">{{ check.name }}</a>
-          </td>
         </tr>
       </tbody>
     </table>
