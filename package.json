@@ -9,6 +9,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.22.0",
     "@nuxt/content": "^1.14.0",
     "@nuxtjs/axios": "^5.12.5",
     "@nuxtjs/content": "^0.3.0",

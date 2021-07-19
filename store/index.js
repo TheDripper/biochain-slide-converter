@@ -9,7 +9,8 @@ export const state = () => ({
   uploads: [],
   converted: [],
   converted: [],
-  date: ""
+  date: "",
+  audit: null
 });
 
 export const mutations = {
@@ -66,6 +67,8 @@ export const actions = {
     let date = live.pop();
     let { data } = await this.$axios("/server-middleware/slides");
     commit("queued",data);
+    let audit = await this.$axios("/server-middleware/audit");
+    commit("audit",audit.data);
     // let converted = await $content("converted").fetch();
     // let uploads = await $content("imports").fetch();
     // commit("converted",converted);

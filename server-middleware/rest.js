@@ -60,9 +60,9 @@ async function convertDzi(slides) {
         size: 512
       })
       .toFile(path.join(__dirname, "converted", filename, filename + ".dz"));
-      let log = {
-        filename
-      }
+    let log = {
+      filename
+    };
     gracefulFs.writeFileSync(
       "./content/converted/" + filename + ".json",
       JSON.stringify(log)
@@ -72,9 +72,36 @@ async function convertDzi(slides) {
   console.log("convert done");
 }
 const convertSync = util.promisify(convertDzi);
-
+const { S3Client, paginateListObjectsV2 } = require("@aws-sdk/client-s3");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.all("/audit", async (req, res) => {
+  //...
+  try {
+    const paginatorConfig = {
+      client: new S3Client({}),
+      pageSize: 1000 
+    };
+    const commandParams = { Bucket: "biochain" };
+    const paginator = paginateListObjectsV2(paginatorConfig, commandParams);
+    const objects = [];
+    for await (const page of paginator) {
+      // page contains a single paginated output.
+      console.log(page)
+      for (const file of page.Contents) {
+        if(path.extname(file.Key)=='.dzi') {
+          objects.push(file.Key);
+        }
+      }
+      // objects.push(...page.Contents);
+    }
+    console.log("paged");
+    console.log(objects);
+    res.json({ data: objects });
+  } catch (err) {
+    console.log(err);
+  }
+});
 app.all("/slides", async (req, res) => {
   const params = {
     Bucket: "biochain-slide-uploads"

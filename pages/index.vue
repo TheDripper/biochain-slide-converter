@@ -135,6 +135,9 @@ export default {
   },
   // async fetch() {},
   computed: {
+    audit() {
+      return this.$store.state.audit;
+    },
     queued() {
       let slides = [];
       for(let slide of this.$store.state.queued.data.Contents) {
