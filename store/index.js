@@ -1,7 +1,7 @@
 import live from "~/live.json";
 import logs from "~/imports.json";
 // import errors from "~/errors.json";
-// import audit from "~/audit.json";
+import audit from "~/full-audit.json";
 
 export const state = () => ({
   slides: [],
@@ -66,9 +66,16 @@ export const actions = {
     //this.converter();
     let date = live.pop();
     let { data } = await this.$axios("/server-middleware/slides");
+    for (let slide of live) {
+      if(audit.includes(slide.slide)) {
+        slide.status = "Live";
+      } else {
+        slide.status = "Error";
+      }
+    }
     commit("queued",data);
-    let audit = await this.$axios("/server-middleware/audit");
-    commit("audit",audit.data);
+    // let audit = await this.$axios("/server-middleware/audit");
+    commit("audit",audit);
     // let converted = await $content("converted").fetch();
     // let uploads = await $content("imports").fetch();
     // commit("converted",converted);

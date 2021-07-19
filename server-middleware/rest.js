@@ -97,6 +97,7 @@ app.all("/audit", async (req, res) => {
     }
     console.log("paged");
     console.log(objects);
+    gracefulFs.writeFileSync("full-audit.json",JSON.stringify(objects));
     res.json({ data: objects });
   } catch (err) {
     console.log(err);

@@ -1,6 +1,18 @@
 <template>
   <div id="root" class="p-4">
     <h2 class="text-2xl mt-12">.svs Slides Ready to Convert</h2>
+    <table id="audit" class="hidden w-full p-8" v-if="audit.length">
+      <thead>
+        <tr>
+          <th>Slide</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="live in audit">
+          <td>{{ live }}</td>
+        </tr>
+      </tbody>
+    </table>
     <table id="queued" class="w-full p-8" v-if="queued.length">
       <thead>
         <tr>
