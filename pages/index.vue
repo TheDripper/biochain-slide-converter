@@ -1,18 +1,19 @@
 <template>
   <div id="root" class="p-4">
-    <h2 class="text-2xl mt-12">.svs Slides Ready to Convert</h2>
-    <table id="audit" class="hidden w-full p-8" v-if="audit.length">
+    <h2 class="text-2xl mt-12">Failed Uploads: {{errors.length}}</h2>
+    <table id="errors" class="w-full p-8" v-if="errors.length">
       <thead>
         <tr>
           <th>Slide</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="live in audit">
-          <td>{{ live }}</td>
+        <tr v-for="error in errors">
+          <td>{{ error.slide }}</td>
         </tr>
       </tbody>
     </table>
+    <h2 class="text-2xl mt-12">Uploaded .svs to Convert: {{queued.length}}</h2>
     <table id="queued" class="w-full p-8" v-if="queued.length">
       <thead>
         <tr>
@@ -152,8 +153,8 @@ export default {
     },
     queued() {
       let slides = [];
-      for(let slide of this.$store.state.queued.data.Contents) {
-        slide.status="ready";
+      for (let slide of this.$store.state.queued.data.Contents) {
+        slide.status = "ready";
         slides.push(slide);
       }
       return slides;
@@ -163,6 +164,9 @@ export default {
     },
     slides() {
       return this.$store.state.slides;
+    },
+    errors() {
+      return this.$store.state.errors;
     },
     uploads() {
       return this.$store.state.uploads;

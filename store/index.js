@@ -8,7 +8,7 @@ export const state = () => ({
   queued: [],
   uploads: [],
   converted: [],
-  converted: [],
+  errors: [],
   date: "",
   audit: null
 });
@@ -34,6 +34,9 @@ export const mutations = {
   },
   logs(state, audit) {
     state.logs = logs;
+  },
+  errors(state, errors) {
+    state.errors = errors;
   }
 };
 export const actions = {
@@ -66,13 +69,16 @@ export const actions = {
     //this.converter();
     let date = live.pop();
     let { data } = await this.$axios("/server-middleware/slides");
+    let errors = [];
     for (let slide of live) {
       if(audit.includes(slide.slide)) {
-        slide.status = "Live";
+        slide.error = false;
       } else {
-        slide.status = "Error";
+        slide.error = true;
+        errors.push(slide);
       }
     }
+    commit("errors",errors);
     commit("queued",data);
     // let audit = await this.$axios("/server-middleware/audit");
     commit("audit",audit);
