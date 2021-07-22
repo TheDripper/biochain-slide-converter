@@ -9,5 +9,4 @@ nvm install node
 nvm install 12
 nvm alias default 12
 npm install --loglevel verbose
-npm run build
-npm start --loglevel verbose
+npm run dev
