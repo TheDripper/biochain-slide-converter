@@ -9,6 +9,7 @@ sudo chkconfig docker on
 
 Because you always need it....
 
+sudo apt-get install build-essential
 sudo yum install -y git
 
 Reboot to verify it all loads fine on its own.
@@ -27,3 +28,4 @@ sudo chmod +x /usr/local/bin/docker-compose
 Verify success:
 
 docker-compose version
+
