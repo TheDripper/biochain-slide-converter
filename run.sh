@@ -8,5 +8,6 @@ export NVM_DIR="$HOME/.nvm"
 nvm install node
 nvm install 12
 nvm alias default 12
+npm install -g nuxt
 npm install --loglevel verbose
 npm run dev
