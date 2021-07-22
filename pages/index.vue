@@ -47,7 +47,7 @@
     <h2 id="queued" class="text-2xl mt-12">
       Uploaded .svs to Convert: {{ queued.length }}
     </h2>
-    <button @click="this.getSlides">Convert .svs to .dzi</button>
+    <button @click="callGetSlides($event)">Convert .svs to .dzi</button>
     <table class="w-full p-8" v-if="queued.length">
       <thead>
         <tr>
@@ -127,6 +127,12 @@ export default {
   methods: {
     callUploads() {
       this.status = "uploading";
+    },
+    callGetSlides(e) {
+      e.target.classList.add('disabled');
+      e.target.textContent = "Converting...";
+      this.getSlides();
+      console.log(e.target);
     },
     async uploadSlides() {
       let uploadResult = await this.$axios("/server-middleware/upload");
@@ -217,5 +223,9 @@ button {
 }
 table {
   border: 1px solid black;
+}
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
 }
 </style>

@@ -1,5 +1,5 @@
-import live from "~/live.json";
-import logs from "~/imports.json";
+// import live from "~/live.json";
+import live from "~/imports.json";
 // import errors from "~/errors.json";
 import audit from "~/full-audit.json";
 
@@ -31,9 +31,6 @@ export const mutations = {
   },
   audit(state, audit) {
     state.audit = audit;
-  },
-  logs(state, audit) {
-    state.logs = logs;
   },
   errors(state, errors) {
     state.errors = errors;
@@ -88,6 +85,5 @@ export const actions = {
     // commit("uploads",uploads);
     commit("date", date);
     commit("slides", live);
-    commit("logs",logs);
   }
 };
