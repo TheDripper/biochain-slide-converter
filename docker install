@@ -29,3 +29,10 @@ Verify success:
 
 docker-compose version
 
+git clone https://github.com/TheDripper/biochain-slide-converter.git
+
+sudo chmod -R 777 biochain-slide-converter
+rm package-lock.json
+
+PostCSS 8 Fix:
+npm i --save-dev css-loader@^5.0.0 postcss@^8.1.10 postcss-import@^13.0.0 postcss-loader@^4.1.0 postcss-url@^10.1.1

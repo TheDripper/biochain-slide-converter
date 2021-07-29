@@ -39,12 +39,6 @@ const s3 = new AWS.S3({
 async function convertDzi(slides) {
   let audit = [];
   console.log("SUCH GRACE");
-  if (gracefulFs.existsSync(path.join(__dirname, "converted"))) {
-    gracefulFs.rmdirSync(path.join(__dirname, "converted"), {
-      recursive: true
-    });
-  }
-  gracefulFs.mkdirSync(path.join(__dirname, "converted"), 0o777);
   for (let obj of slides) {
     let filename = obj.Key.slice(0, -4);
     console.log(filename);
